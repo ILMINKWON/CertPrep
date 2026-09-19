@@ -1,0 +1,739 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ADSP 문제은행 - 데이터분석 준전문가</title>
+<style>
+  :root {
+    --primary: #4F46E5;
+    --primary-light: #6366F1;
+    --primary-dark: #3730A3;
+    --bg: #F8FAFC;
+    --surface: #FFFFFF;
+    --surface2: #F1F5F9;
+    --border: #E2E8F0;
+    --text: #0F172A;
+    --text2: #475569;
+    --text3: #94A3B8;
+    --correct: #10B981;
+    --wrong: #EF4444;
+    --hard: #F59E0B;
+    --s1: #6366F1;
+    --s2: #0EA5E9;
+    --s3: #10B981;
+    --shadow: 0 1px 3px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.06);
+    --shadow-lg: 0 4px 16px rgba(0,0,0,.10);
+    --radius: 12px;
+  }
+  [data-dark="true"] {
+    --bg: #0F172A;
+    --surface: #1E293B;
+    --surface2: #263045;
+    --border: #334155;
+    --text: #F1F5F9;
+    --text2: #94A3B8;
+    --text3: #475569;
+    --shadow: 0 1px 3px rgba(0,0,0,.3);
+    --shadow-lg: 0 4px 16px rgba(0,0,0,.4);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Pretendard', 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; transition: background .2s, color .2s; }
+
+  /* Layout */
+  .app { display: grid; grid-template-columns: 260px 1fr; min-height: 100vh; max-width: 1280px; margin: 0 auto; }
+  @media (max-width: 768px) { .app { grid-template-columns: 1fr; } }
+
+  /* Sidebar */
+  .sidebar { background: var(--surface); border-right: 1px solid var(--border); padding: 20px 0; display: flex; flex-direction: column; position: sticky; top: 0; height: 100vh; overflow-y: auto; transition: background .2s; }
+  @media (max-width: 768px) { .sidebar { position: fixed; top: 0; left: -260px; width: 260px; height: 100vh; z-index: 200; transition: left .25s ease; } .sidebar.open { left: 0; } }
+  .sidebar-logo { padding: 0 20px 20px; border-bottom: 1px solid var(--border); }
+  .sidebar-logo h1 { font-size: 18px; font-weight: 700; color: var(--primary); }
+  .sidebar-logo p { font-size: 12px; color: var(--text2); margin-top: 2px; }
+  .nav-section { padding: 16px 12px 4px; }
+  .nav-label { font-size: 11px; font-weight: 600; color: var(--text3); text-transform: uppercase; letter-spacing: .06em; padding: 0 8px; margin-bottom: 4px; }
+  .nav-btn { display: flex; align-items: center; gap: 10px; width: 100%; padding: 9px 12px; border: none; border-radius: 8px; background: transparent; color: var(--text2); font-size: 14px; cursor: pointer; text-align: left; transition: background .15s, color .15s; }
+  .nav-btn:hover { background: var(--surface2); color: var(--text); }
+  .nav-btn.active { background: #EEF2FF; color: var(--primary); font-weight: 600; }
+  [data-dark="true"] .nav-btn.active { background: #1e1b4b; color: #a5b4fc; }
+  .nav-btn .icon { font-size: 16px; width: 20px; text-align: center; }
+  .nav-btn .badge { margin-left: auto; background: var(--primary); color: #fff; font-size: 10px; padding: 1px 6px; border-radius: 20px; }
+  .sidebar-stats { margin-top: auto; padding: 16px; border-top: 1px solid var(--border); }
+  .stat-row { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 6px; }
+  .stat-val { font-weight: 700; color: var(--primary); }
+  .progress-bar { height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; margin-top: 8px; }
+  .progress-fill { height: 100%; background: linear-gradient(90deg, var(--primary), var(--primary-light)); border-radius: 3px; transition: width .5s ease; }
+
+  /* Main content */
+  .main { padding: 24px; }
+  @media (max-width: 768px) { .main { padding: 16px; } }
+
+  /* Top bar */
+  .topbar { display: flex; align-items: center; gap: 12px; margin-bottom: 24px; }
+  .topbar h2 { font-size: 20px; font-weight: 700; flex: 1; }
+  .menu-btn { display: none; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 8px; cursor: pointer; font-size: 18px; color: var(--text); }
+  @media (max-width: 768px) { .menu-btn { display: block; } }
+  .icon-btn { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 8px 12px; cursor: pointer; font-size: 14px; color: var(--text2); transition: background .15s; }
+  .icon-btn:hover { background: var(--surface2); }
+
+  /* Cards */
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; box-shadow: var(--shadow); margin-bottom: 20px; transition: background .2s; }
+
+  /* Home grid */
+  .home-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; margin-bottom: 24px; }
+  .mode-card { background: var(--surface); border: 2px solid var(--border); border-radius: var(--radius); padding: 20px; cursor: pointer; transition: border-color .15s, box-shadow .15s, transform .1s; text-align: center; }
+  .mode-card:hover { border-color: var(--primary); box-shadow: var(--shadow-lg); transform: translateY(-2px); }
+  .mode-card .mc-icon { font-size: 36px; margin-bottom: 10px; }
+  .mode-card .mc-title { font-size: 15px; font-weight: 700; margin-bottom: 4px; }
+  .mode-card .mc-desc { font-size: 12px; color: var(--text2); }
+
+  /* Subject badges */
+  .badge-s1 { background: #EEF2FF; color: #4338CA; font-size: 11px; padding: 2px 8px; border-radius: 20px; font-weight: 600; }
+  .badge-s2 { background: #E0F2FE; color: #0369A1; font-size: 11px; padding: 2px 8px; border-radius: 20px; font-weight: 600; }
+  .badge-s3 { background: #D1FAE5; color: #065F46; font-size: 11px; padding: 2px 8px; border-radius: 20px; font-weight: 600; }
+  .badge-hard { background: #FEF3C7; color: #92400E; font-size: 11px; padding: 2px 8px; border-radius: 20px; font-weight: 600; }
+  [data-dark="true"] .badge-s1 { background: #1e1b4b; color: #a5b4fc; }
+  [data-dark="true"] .badge-s2 { background: #0c2842; color: #7dd3fc; }
+  [data-dark="true"] .badge-s3 { background: #052e16; color: #6ee7b7; }
+  [data-dark="true"] .badge-hard { background: #3b2002; color: #fcd34d; }
+
+  /* Question view */
+  .q-header { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+  .q-num { font-size: 13px; color: var(--text2); }
+  .q-text { font-size: 16px; font-weight: 500; line-height: 1.7; margin-bottom: 20px; }
+  .options { display: flex; flex-direction: column; gap: 10px; }
+  .opt-btn { display: flex; align-items: flex-start; gap: 12px; padding: 14px 16px; border: 2px solid var(--border); border-radius: 10px; background: var(--surface); cursor: pointer; text-align: left; font-size: 14px; color: var(--text); transition: border-color .15s, background .15s; line-height: 1.5; }
+  .opt-btn:hover:not(:disabled) { border-color: var(--primary); background: #F5F3FF; }
+  [data-dark="true"] .opt-btn:hover:not(:disabled) { background: #1e1b4b; }
+  .opt-btn:disabled { cursor: default; }
+  .opt-btn.correct { border-color: var(--correct); background: #F0FDF4; color: #065F46; }
+  .opt-btn.wrong { border-color: var(--wrong); background: #FEF2F2; color: #991B1B; }
+  [data-dark="true"] .opt-btn.correct { background: #052e16; color: #6ee7b7; }
+  [data-dark="true"] .opt-btn.wrong { background: #450a0a; color: #fca5a5; }
+  .opt-num { font-weight: 700; font-size: 15px; min-width: 22px; }
+  .result-panel { margin-top: 16px; padding: 16px; border-radius: 10px; border-left: 4px solid; }
+  .result-panel.correct { border-color: var(--correct); background: #F0FDF4; }
+  .result-panel.wrong { border-color: var(--wrong); background: #FEF2F2; }
+  [data-dark="true"] .result-panel.correct { background: #052e16; }
+  [data-dark="true"] .result-panel.wrong { background: #450a0a; }
+  .result-title { font-weight: 700; font-size: 15px; margin-bottom: 6px; }
+  .result-title.correct { color: var(--correct); }
+  .result-title.wrong { color: var(--wrong); }
+  .result-exp { font-size: 13px; line-height: 1.7; color: var(--text2); }
+  .q-actions { display: flex; gap: 10px; margin-top: 18px; flex-wrap: wrap; }
+  .btn { padding: 10px 20px; border-radius: 8px; border: none; font-size: 14px; font-weight: 600; cursor: pointer; transition: background .15s, transform .1s; }
+  .btn:active { transform: scale(.97); }
+  .btn-primary { background: var(--primary); color: #fff; }
+  .btn-primary:hover { background: var(--primary-dark); }
+  .btn-outline { background: transparent; color: var(--text2); border: 1.5px solid var(--border); }
+  .btn-outline:hover { background: var(--surface2); }
+  .btn-orange { background: #F59E0B; color: #fff; }
+  .btn-orange:hover { background: #D97706; }
+
+  /* Session bar */
+  .session-bar { display: flex; align-items: center; gap: 12px; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 12px 16px; margin-bottom: 20px; font-size: 13px; flex-wrap: wrap; }
+  .session-bar .s-label { color: var(--text2); }
+  .session-bar .s-val { font-weight: 700; }
+  .session-bar .s-bar { flex: 1; min-width: 80px; height: 8px; background: var(--border); border-radius: 4px; overflow: hidden; }
+  .session-bar .s-fill { height: 100%; border-radius: 4px; background: linear-gradient(90deg, var(--correct), #34D399); transition: width .4s; }
+
+  /* Stats page */
+  .stats-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 16px; margin-bottom: 24px; }
+  .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; text-align: center; }
+  .stat-card .sc-num { font-size: 32px; font-weight: 800; color: var(--primary); }
+  .stat-card .sc-label { font-size: 13px; color: var(--text2); margin-top: 4px; }
+  .subject-bar { margin-bottom: 12px; }
+  .subject-bar .sb-header { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 4px; }
+  .subject-bar .sb-bar { height: 8px; background: var(--border); border-radius: 4px; overflow: hidden; }
+  .subject-bar .sb-fill { height: 100%; border-radius: 4px; }
+
+  /* Question list */
+  .q-list { display: flex; flex-direction: column; gap: 8px; }
+  .q-list-item { display: flex; align-items: flex-start; gap: 12px; padding: 14px 16px; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; cursor: pointer; transition: border-color .15s; }
+  .q-list-item:hover { border-color: var(--primary); }
+  .q-list-item .qi-num { font-size: 13px; color: var(--text3); min-width: 28px; padding-top: 2px; }
+  .q-list-item .qi-text { font-size: 14px; flex: 1; line-height: 1.5; }
+  .q-list-item .qi-badges { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 4px; }
+  .empty { text-align: center; padding: 48px; color: var(--text3); }
+  .empty .e-icon { font-size: 48px; margin-bottom: 12px; }
+
+  /* Overlay */
+  .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.4); z-index: 150; }
+  @media (max-width: 768px) { .overlay.show { display: block; } }
+
+  /* Transitions */
+  .page { animation: fadeIn .2s ease; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+  /* Reset confirm */
+  .modal { display: none; position: fixed; inset: 0; z-index: 300; align-items: center; justify-content: center; }
+  .modal.show { display: flex; }
+  .modal-bg { position: absolute; inset: 0; background: rgba(0,0,0,.5); }
+  .modal-box { position: relative; background: var(--surface); border-radius: var(--radius); padding: 28px; max-width: 340px; width: 90%; box-shadow: var(--shadow-lg); }
+  .modal-box h3 { margin-bottom: 8px; }
+  .modal-box p { font-size: 14px; color: var(--text2); margin-bottom: 20px; }
+  .modal-actions { display: flex; gap: 10px; justify-content: flex-end; }
+</style>
+</head>
+<body>
+<div class="overlay" id="overlay" onclick="closeSidebar()"></div>
+<div class="app" id="app">
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <h1>📊 ADSP 문제은행</h1>
+      <p>데이터분석 준전문가 시험 대비</p>
+    </div>
+    <div class="nav-section">
+      <div class="nav-label">학습 모드</div>
+      <button class="nav-btn active" onclick="navigate('home')" data-page="home"><span class="icon">🏠</span> 홈</button>
+      <button class="nav-btn" onclick="navigate('all')" data-page="all"><span class="icon">📝</span> 전체 문제 풀기</button>
+      <button class="nav-btn" onclick="navigate('hard')" data-page="hard"><span class="icon">🔥</span> 자주 틀리는 문제 <span class="badge" id="hard-count"></span></button>
+      <button class="nav-btn" onclick="navigate('wrong')" data-page="wrong"><span class="icon">❌</span> 틀린 문제 복습 <span class="badge" id="wrong-count"></span></button>
+    </div>
+    <div class="nav-section">
+      <div class="nav-label">과목별</div>
+      <button class="nav-btn" onclick="navigate('s1')" data-page="s1"><span class="icon">📘</span> 제1과목: 데이터 이해</button>
+      <button class="nav-btn" onclick="navigate('s2')" data-page="s2"><span class="icon">📗</span> 제2과목: 분석 기획</button>
+      <button class="nav-btn" onclick="navigate('s3')" data-page="s3"><span class="icon">📙</span> 제3과목: 데이터 분석</button>
+    </div>
+    <div class="nav-section">
+      <div class="nav-label">기타</div>
+      <button class="nav-btn" onclick="navigate('list')" data-page="list"><span class="icon">📋</span> 문제 목록</button>
+      <button class="nav-btn" onclick="navigate('stats')" data-page="stats"><span class="icon">📈</span> 학습 통계</button>
+    </div>
+    <div class="sidebar-stats">
+      <div class="stat-row"><span>전체 정답률</span><span class="stat-val" id="sb-rate">0%</span></div>
+      <div class="stat-row"><span>푼 문제</span><span class="stat-val" id="sb-attempted">0</span></div>
+      <div class="progress-bar"><div class="progress-fill" id="sb-bar" style="width:0%"></div></div>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <main class="main" id="main">
+    <div class="topbar">
+      <button class="menu-btn" onclick="openSidebar()">☰</button>
+      <h2 id="page-title">ADSP 문제은행</h2>
+      <button class="icon-btn" onclick="toggleDark()" id="dark-btn">🌙 다크모드</button>
+      <button class="icon-btn" onclick="showReset()">🔄 초기화</button>
+    </div>
+    <div id="content"></div>
+  </main>
+</div>
+
+<!-- Reset modal -->
+<div class="modal" id="reset-modal">
+  <div class="modal-bg" onclick="hideReset()"></div>
+  <div class="modal-box">
+    <h3>학습 기록 초기화</h3>
+    <p>모든 학습 기록(정답 수, 오답, 북마크)이 삭제됩니다. 계속하시겠습니까?</p>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="hideReset()">취소</button>
+      <button class="btn btn-primary" onclick="resetAll()" style="background:#EF4444">초기화</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ─────────────────────────────────────────────
+// QUESTION DATA (65 questions)
+// ─────────────────────────────────────────────
+const questions = [
+  // ═══ 제1과목: 데이터 이해 (20문제) ═══
+  {id:1,subject:1,subjectName:"데이터 이해",question:"다음 중 데이터(Data)에 대한 설명으로 가장 적절하지 않은 것은?",options:["데이터는 관찰이나 측정을 통해 수집된 사실이나 값이다.","데이터 자체는 특정 목적을 위해 가공·처리되지 않은 상태이다.","데이터는 반드시 수치(숫자) 형태로만 존재한다.","데이터는 정형·반정형·비정형 형태로 분류될 수 있다."],answer:2,explanation:"데이터는 수치뿐 아니라 텍스트, 이미지, 영상 등 다양한 형태로 존재합니다. 수치 형태만이 데이터라는 설명은 틀렸습니다.",hardQuestion:false},
+  {id:2,subject:1,subjectName:"데이터 이해",question:"다음 중 '지식(Knowledge)'에 대한 설명으로 가장 옳은 것은?",options:["단순히 수집된 원시 데이터 그 자체이다.","데이터를 가공하여 의미를 부여한 것이다.","정보를 통해 도출된 일반화된 원칙·통찰이다.","행동으로 직접 연결되는 의사결정 능력이다."],answer:2,explanation:"DIKW 피라미드에서 지식(Knowledge)은 정보(Information)를 맥락화·일반화하여 얻어진 통찰과 원칙입니다. 단순 데이터나 정보와 구분됩니다.",hardQuestion:true},
+  {id:3,subject:1,subjectName:"데이터 이해",question:"DIKW 피라미드에서 데이터를 처리·가공하여 패턴과 의미를 부여한 결과물은?",options:["지혜(Wisdom)","지식(Knowledge)","정보(Information)","인사이트(Insight)"],answer:2,explanation:"DIKW 계층에서 Data → Information → Knowledge → Wisdom 순으로 발전합니다. 데이터에 의미와 맥락을 부여한 것이 정보(Information)입니다.",hardQuestion:false},
+  {id:4,subject:1,subjectName:"데이터 이해",question:"빅데이터의 3V에 해당하지 않는 것은?",options:["Volume(규모)","Velocity(속도)","Variety(다양성)","Validity(유효성)"],answer:3,explanation:"빅데이터의 3V는 Volume(규모), Velocity(속도), Variety(다양성)입니다. Validity(유효성)는 3V에 포함되지 않습니다. 이후 Value, Veracity 등이 추가되기도 합니다.",hardQuestion:false},
+  {id:5,subject:1,subjectName:"데이터 이해",question:"다음 중 비정형 데이터(Unstructured Data)에 해당하는 것은?",options:["관계형 데이터베이스 테이블","엑셀 스프레드시트","SNS 게시물 텍스트","CSV 파일"],answer:2,explanation:"SNS 게시물, 이미지, 동영상, 음성 파일 등은 미리 정의된 스키마 없이 저장되는 비정형 데이터입니다.",hardQuestion:false},
+  {id:6,subject:1,subjectName:"데이터 이해",question:"개인정보 비식별화 기법 중 특정 값을 평균값 등 다른 값으로 대체하는 방법은?",options:["데이터 마스킹","데이터 범주화","데이터 치환(대체)","데이터 삭제"],answer:2,explanation:"데이터 치환(대체)은 개인 식별 정보를 임의의 값이나 평균값 등으로 바꾸는 비식별화 기법입니다. 마스킹은 일부 문자를 *로 가리는 것입니다.",hardQuestion:true},
+  {id:7,subject:1,subjectName:"데이터 이해",question:"빅데이터가 기업에 가져온 가치 중 '운영 최적화'와 가장 관련이 깊은 사례는?",options:["SNS 감성 분석으로 브랜드 이미지 모니터링","제조 공정 센서 데이터로 불량률 예측·감소","고객 구매 이력으로 상품 추천","공공 데이터 개방으로 신산업 창출"],answer:1,explanation:"제조 공정의 센서 데이터를 활용해 불량률을 예측하고 줄이는 것은 운영 최적화의 대표 사례입니다.",hardQuestion:false},
+  {id:8,subject:1,subjectName:"데이터 이해",question:"다음 중 데이터 사이언티스트가 갖춰야 할 역량으로 보기 어려운 것은?",options:["수학/통계 지식","프로그래밍 능력","도메인 전문 지식","회계감사 전문 자격"],answer:3,explanation:"데이터 사이언티스트의 핵심 역량은 수학/통계, 프로그래밍, 도메인 지식, 커뮤니케이션 능력입니다. 회계감사 자격은 필수 요건이 아닙니다.",hardQuestion:false},
+  {id:9,subject:1,subjectName:"데이터 이해",question:"다크 데이터(Dark Data)에 대한 설명으로 옳은 것은?",options:["악의적 목적으로 수집된 불법 데이터이다.","수집은 되었지만 분석·활용되지 않고 방치된 데이터이다.","인터넷에서 공개되지 않은 딥웹 데이터이다.","암호화되어 접근이 불가능한 데이터이다."],answer:1,explanation:"다크 데이터는 기업이 수집·저장하지만 분석에 활용하지 않아 잠재적 가치가 발굴되지 않은 데이터를 말합니다.",hardQuestion:true},
+  {id:10,subject:1,subjectName:"데이터 이해",question:"다음 중 메타데이터(Metadata)에 대한 설명으로 옳은 것은?",options:["대용량 원시 데이터를 의미한다.","데이터에 대한 데이터로 데이터의 특성·구조를 설명한다.","실시간으로 생성되는 스트리밍 데이터이다.","정형화된 수치 데이터만을 의미한다."],answer:1,explanation:"메타데이터는 '데이터에 관한 데이터'로, 데이터의 생성일시·형식·크기·작성자 등 속성 정보를 담습니다.",hardQuestion:false},
+  {id:11,subject:1,subjectName:"데이터 이해",question:"개인정보 보호법에서 규정하는 개인정보에 해당하지 않는 것은?",options:["이름과 주민등록번호의 조합","사진과 이름의 조합","완전히 익명처리되어 재식별이 불가능한 정보","IP 주소와 이름의 조합"],answer:2,explanation:"완전히 익명처리되어 어떤 방법으로도 개인을 식별할 수 없는 정보는 개인정보에 해당하지 않습니다.",hardQuestion:true},
+  {id:12,subject:1,subjectName:"데이터 이해",question:"다음 중 오픈 데이터(Open Data)의 특성으로 적절하지 않은 것은?",options:["누구나 자유롭게 접근·이용할 수 있다.","재배포가 허용된다.","반드시 유료로 제공된다.","상업적 이용도 가능한 형태가 많다."],answer:2,explanation:"오픈 데이터는 접근·이용·재배포가 자유로운 것이 핵심입니다. 반드시 유료라는 것은 오픈 데이터의 정의에 반합니다.",hardQuestion:false},
+  {id:13,subject:1,subjectName:"데이터 이해",question:"빅데이터 분석에서 '가치(Value)'가 강조되는 이유로 가장 적절한 것은?",options:["데이터의 양이 많을수록 항상 더 좋은 결과가 나오기 때문이다.","방대한 데이터에서 실제 비즈니스 인사이트를 추출하는 것이 목적이기 때문이다.","빅데이터는 수집 비용이 저렴하기 때문이다.","모든 빅데이터는 이미 가치 있는 형태로 저장되기 때문이다."],answer:1,explanation:"빅데이터의 궁극적 목적은 방대한 데이터에서 실질적 가치를 창출하는 것입니다. 데이터 크기 자체가 목적이 아닙니다.",hardQuestion:false},
+  {id:14,subject:1,subjectName:"데이터 이해",question:"데이터 거버넌스에서 '데이터 품질 관리'와 거리가 먼 항목은?",options:["데이터 정확성 확보","데이터 일관성 유지","데이터 압축 알고리즘 개발","데이터 완전성 점검"],answer:2,explanation:"데이터 품질 관리는 정확성·일관성·완전성·적시성 등을 다룹니다. 압축 알고리즘 개발은 품질 관리가 아닌 저장 기술 영역입니다.",hardQuestion:false},
+  {id:15,subject:1,subjectName:"데이터 이해",question:"반정형 데이터(Semi-structured Data)의 예로 가장 적절한 것은?",options:["관계형 DB 테이블","JSON 파일","MP4 동영상 파일","음성 녹음 파일"],answer:1,explanation:"JSON, XML, HTML 등은 완전한 스키마는 없지만 태그나 키-값 쌍 형태로 일부 구조를 갖는 반정형 데이터입니다.",hardQuestion:false},
+  {id:16,subject:1,subjectName:"데이터 이해",question:"빅데이터 분석가가 데이터를 잘못 해석하여 실제로 없는 패턴을 발견했다고 믿는 오류는?",options:["1종 오류","2종 오류","확증 편향","스퍼리어스 상관"],answer:3,explanation:"스퍼리어스 상관(Spurious Correlation)은 실제로는 아무 관계가 없지만 우연히 높은 상관관계를 보이는 현상으로, 빅데이터 분석에서 자주 발생하는 함정입니다.",hardQuestion:true},
+  {id:17,subject:1,subjectName:"데이터 이해",question:"'데이터 리터러시(Data Literacy)'의 의미로 가장 적절한 것은?",options:["데이터 저장 기술을 개발하는 능력","데이터를 읽고 이해하며 활용하여 의사결정하는 능력","데이터 수집 장비를 운용하는 능력","데이터베이스 설계 능력"],answer:1,explanation:"데이터 리터러시는 데이터를 읽고(Read), 이해하고(Understand), 다루고(Work with), 데이터 기반으로 논증하는(Argue with) 능력입니다.",hardQuestion:false},
+  {id:18,subject:1,subjectName:"데이터 이해",question:"다음 중 빅데이터의 활용 사례로 적절하지 않은 것은?",options:["병원 EMR 데이터로 질병 예측 모델 구축","교통 센서 데이터로 신호 체계 최적화","개인 일기장 수작업 필기로 설문 분석","SNS 게시물로 유행 트렌드 분석"],answer:2,explanation:"수작업 필기 설문은 빅데이터의 특성(대규모·고속·다양성)을 갖추지 않습니다. 나머지는 빅데이터 활용 사례입니다.",hardQuestion:false},
+  {id:19,subject:1,subjectName:"데이터 이해",question:"k-익명성(k-Anonymity)에 대한 설명으로 옳은 것은?",options:["데이터셋에서 k명 이상의 동일한 준식별자 조합이 존재하도록 보장한다.","k개의 키를 이용해 데이터를 암호화한다.","k번 이하로만 데이터에 접근하도록 제한한다.","k개 이상의 속성을 반드시 포함하도록 한다."],answer:0,explanation:"k-익명성은 준식별자(나이, 성별, 지역 등) 조합이 k명 이상에게 동일하게 적용되어 특정 개인을 구분할 수 없도록 하는 비식별화 기법입니다.",hardQuestion:true},
+  {id:20,subject:1,subjectName:"데이터 이해",question:"다음 설명 중 '데이터 웨어하우스(Data Warehouse)'에 대한 설명으로 옳은 것은?",options:["실시간 트랜잭션 처리를 위한 운영 데이터베이스이다.","분석 목적으로 통합·저장된 대용량 이력 데이터 저장소이다.","소셜 미디어 데이터만을 전문적으로 저장한다.","비정형 데이터만을 처리하는 NoSQL 시스템이다."],answer:1,explanation:"데이터 웨어하우스는 다양한 소스의 데이터를 주제 중심으로 통합·정제하여 분석·의사결정을 위해 저장하는 시스템입니다.",hardQuestion:false},
+
+  // ═══ 제2과목: 데이터 분석 기획 (20문제) ═══
+  {id:21,subject:2,subjectName:"데이터 분석 기획",question:"분석 방법론 중 KDD(Knowledge Discovery in Databases) 프로세스의 단계를 올바른 순서로 나열한 것은?",options:["데이터 선택 → 전처리 → 변환 → 데이터마이닝 → 해석·평가","전처리 → 데이터 선택 → 데이터마이닝 → 변환 → 해석·평가","데이터마이닝 → 데이터 선택 → 전처리 → 변환 → 해석·평가","해석·평가 → 데이터 선택 → 전처리 → 변환 → 데이터마이닝"],answer:0,explanation:"KDD 프로세스: ① 데이터 선택 → ② 전처리(정제) → ③ 변환(특성 추출) → ④ 데이터마이닝 → ⑤ 해석·평가 순입니다.",hardQuestion:true},
+  {id:22,subject:2,subjectName:"데이터 분석 기획",question:"CRISP-DM 방법론의 6단계를 순서대로 나열한 것으로 옳은 것은?",options:["업무 이해 → 데이터 이해 → 데이터 준비 → 모델링 → 평가 → 전개","데이터 이해 → 업무 이해 → 모델링 → 데이터 준비 → 평가 → 전개","업무 이해 → 모델링 → 데이터 이해 → 데이터 준비 → 평가 → 전개","데이터 준비 → 업무 이해 → 데이터 이해 → 모델링 → 평가 → 전개"],answer:0,explanation:"CRISP-DM: ① 업무 이해(Business Understanding) → ② 데이터 이해 → ③ 데이터 준비 → ④ 모델링 → ⑤ 평가 → ⑥ 전개(Deployment)입니다.",hardQuestion:false},
+  {id:23,subject:2,subjectName:"데이터 분석 기획",question:"분석 과제 정의 시 '분석 유니버스(Analytics Universe)'와 관련된 설명으로 옳은 것은?",options:["우주 관련 데이터를 분석하는 특수 분야이다.","기업이 수행할 수 있는 모든 분석 과제의 집합을 의미한다.","가장 긴급한 단 하나의 분석 과제를 선정하는 방법이다.","데이터 분석 플랫폼의 명칭이다."],answer:1,explanation:"분석 유니버스는 기업이 현재 또는 미래에 수행 가능한 모든 분석 과제들의 전체 집합을 의미하며, 이 중에서 우선순위를 선정합니다.",hardQuestion:true},
+  {id:24,subject:2,subjectName:"데이터 분석 기획",question:"다음 중 분석 ROI(투자 대비 효과) 산정 시 고려해야 할 비용 항목이 아닌 것은?",options:["데이터 수집·저장 비용","분석 인력 인건비","모델 개발 및 운영 비용","경쟁사 매출액"],answer:3,explanation:"ROI = (효과 - 비용) / 비용 × 100. 경쟁사 매출은 자사 ROI 산정과 직접 관련 없습니다. 비용에는 데이터, 인력, 인프라, 운영 비용이 포함됩니다.",hardQuestion:false},
+  {id:25,subject:2,subjectName:"데이터 분석 기획",question:"데이터 거버넌스(Data Governance)의 주요 구성 요소로 적절하지 않은 것은?",options:["데이터 표준화","데이터 품질 관리","데이터 마케팅 전략","데이터 보안·접근 통제"],answer:2,explanation:"데이터 거버넌스는 표준화, 품질 관리, 보안/접근 통제, 메타데이터 관리, 마스터 데이터 관리 등을 포함합니다. 마케팅 전략은 거버넌스 범위 밖입니다.",hardQuestion:false},
+  {id:26,subject:2,subjectName:"데이터 분석 기획",question:"분석 마스터플랜 수립 시 '과제 우선순위 선정 기준'으로 가장 적절한 것은?",options:["분석 담당자의 개인 선호도","비즈니스 임팩트와 실행 가능성(용이성)","데이터 파일 크기","분석 도구 라이선스 비용"],answer:1,explanation:"과제 우선순위는 비즈니스 임팩트(전략적 중요도, 기대 효과)와 실행 가능성(기술·데이터 준비도)을 축으로 한 2×2 매트릭스로 선정하는 것이 일반적입니다.",hardQuestion:false},
+  {id:27,subject:2,subjectName:"데이터 분석 기획",question:"다음 중 '하향식(Top-down) 분석 과제 도출' 방식의 설명으로 옳은 것은?",options:["데이터에서 패턴을 먼저 찾고, 이를 기반으로 비즈니스 문제를 도출한다.","비즈니스 전략·목표에서 출발하여 필요한 분석 과제를 도출한다.","현장 담당자의 아이디어를 취합하여 분석 과제를 선정한다.","경쟁사 분석 사례를 벤치마킹하여 적용한다."],answer:1,explanation:"하향식(Top-down): 경영 목표/전략 → 핵심 성과 지표(KPI) → 분석 과제 도출. 반대로 Bottom-up은 데이터에서 패턴을 발견하는 방식입니다.",hardQuestion:true},
+  {id:28,subject:2,subjectName:"데이터 분석 기획",question:"분석 방법론 중 SEMMA 프로세스의 단계로 올바른 것은?",options:["Sample → Explore → Modify → Model → Assess","Select → Examine → Mine → Manage → Assess","Sample → Extract → Modify → Model → Apply","Select → Explore → Map → Model → Assess"],answer:0,explanation:"SEMMA(SAS 제안): S(Sample, 샘플링) → E(Explore, 탐색) → M(Modify, 데이터 수정) → M(Model, 모델링) → A(Assess, 평가) 입니다.",hardQuestion:true},
+  {id:29,subject:2,subjectName:"데이터 분석 기획",question:"데이터 분석 조직 구조 중 'CoE(Center of Excellence)' 방식의 특징으로 옳은 것은?",options:["각 사업부에 분석 인력이 분산 배치된다.","분석 전문 조직이 중앙에 집중되어 전사 지원한다.","분석 업무를 외부에 완전히 위탁한다.","분석 조직 없이 현업 담당자가 직접 수행한다."],answer:1,explanation:"CoE(분석 탁월성 센터)는 분석 전문가를 중앙 조직에 집중 배치하여 전사 데이터 분석을 지원하는 방식입니다.",hardQuestion:false},
+  {id:30,subject:2,subjectName:"데이터 분석 기획",question:"'데이터 사이언스 팀'이 갖춰야 할 역할이 아닌 것은?",options:["데이터 엔지니어링","분석 모델 개발 및 검증","비즈니스 인사이트 도출","건물 시설 관리"],answer:3,explanation:"데이터 사이언스 팀의 역할은 데이터 엔지니어링, 모델 개발, 비즈니스 해석 등입니다. 건물 시설 관리는 무관합니다.",hardQuestion:false},
+  {id:31,subject:2,subjectName:"데이터 분석 기획",question:"분석 과제의 '비즈니스 케이스(Business Case)' 작성 시 포함되지 않아도 되는 항목은?",options:["분석의 목적 및 기대 효과","필요 데이터와 분석 방법","분석 담당자의 가족 관계","소요 비용 및 일정"],answer:2,explanation:"비즈니스 케이스에는 목적, 기대효과, 방법론, 비용·일정, 위험 요소 등이 포함됩니다. 담당자 가족 관계는 무관합니다.",hardQuestion:false},
+  {id:32,subject:2,subjectName:"데이터 분석 기획",question:"데이터 분석 성숙도 모델에서 가장 높은 단계의 특징은?",options:["기초 통계 분석을 처음 시작한 단계","규정된 절차에 따라 분석을 수행하는 단계","실시간 분석으로 미래를 예측하고 최적화하는 단계","분석 결과를 가끔 보고서로 제출하는 단계"],answer:2,explanation:"분석 성숙도 최고 단계는 최적화 단계(Optimizing)로, 실시간 분석·예측을 통해 의사결정을 자동화하고 지속적으로 개선하는 수준입니다.",hardQuestion:false},
+  {id:33,subject:2,subjectName:"데이터 분석 기획",question:"ISP(Information Strategy Planning, 정보 전략 계획) 수립 시 현황 분석 단계에서 주로 사용하는 분석 기법은?",options:["선형 회귀 분석","SWOT 분석","군집 분석","연관 분석"],answer:1,explanation:"ISP 현황 분석에서는 내부 강점·약점, 외부 기회·위협을 파악하는 SWOT 분석이 대표적으로 활용됩니다.",hardQuestion:false},
+  {id:34,subject:2,subjectName:"데이터 분석 기획",question:"다음 중 '파일럿 프로젝트(Pilot Project)'를 먼저 수행하는 이유로 가장 적절한 것은?",options:["전체 예산을 절약하기 위해","소규모 적용으로 위험을 검증하고 전사 확대 전 학습하기 위해","분석가의 역량 평가를 위해","경쟁사 동향을 파악하기 위해"],answer:1,explanation:"파일럿 프로젝트는 소규모로 먼저 적용하여 기술적·비즈니스적 리스크를 검증하고, 전사 확대 시의 시행착오를 줄이기 위해 수행합니다.",hardQuestion:false},
+  {id:35,subject:2,subjectName:"데이터 분석 기획",question:"분석 방법론에서 '프로토타입 접근법'의 특징으로 옳은 것은?",options:["처음부터 완벽한 모델을 한 번에 개발한다.","빠른 시제품 개발 후 반복적으로 개선한다.","요구사항을 문서로만 정의하고 개발한다.","분석 없이 직관에 의존하여 의사결정한다."],answer:1,explanation:"프로토타입 접근법은 완성도 낮은 초기 모델을 빠르게 구현 후 피드백을 반영하여 반복 개선하는 애자일 방식입니다.",hardQuestion:false},
+  {id:36,subject:2,subjectName:"데이터 분석 기획",question:"'데이터 마트(Data Mart)'와 '데이터 웨어하우스'의 차이로 옳은 것은?",options:["데이터 마트는 전사 통합 저장소이고, 웨어하우스는 부서별 저장소이다.","데이터 마트는 특정 부서·주제 한정 저장소이고, 웨어하우스는 전사 통합 저장소이다.","두 용어는 완전히 동일한 개념이다.","데이터 마트는 실시간 데이터, 웨어하우스는 과거 데이터만 저장한다."],answer:1,explanation:"데이터 웨어하우스는 전사 통합 저장소, 데이터 마트는 특정 부서(마케팅, 재무 등) 또는 주제 영역에 특화된 소규모 저장소입니다.",hardQuestion:true},
+  {id:37,subject:2,subjectName:"데이터 분석 기획",question:"비즈니스 목표를 분석 목표로 변환할 때 사용하는 기법으로 '핵심 성과 지표(KPI)'를 정의하는 방법과 가장 관련 깊은 것은?",options:["SWOT 분석","균형성과표(BSC, Balanced Scorecard)","CRISP-DM","SEMMA"],answer:1,explanation:"BSC(균형성과표)는 재무, 고객, 내부 프로세스, 학습/성장 관점에서 KPI를 체계적으로 도출하는 데 활용됩니다.",hardQuestion:false},
+  {id:38,subject:2,subjectName:"데이터 분석 기획",question:"데이터 분석에서 '탐색적 데이터 분석(EDA, Exploratory Data Analysis)'의 목적으로 옳은 것은?",options:["이미 세운 가설만을 검증한다.","데이터의 구조·분포·이상값을 시각화·요약하여 이해한다.","최종 예측 모델을 배포한다.","데이터를 수집하는 방법을 결정한다."],answer:1,explanation:"EDA는 통계 요약과 시각화를 통해 데이터 분포, 이상값, 결측값, 변수 간 관계를 파악하는 과정입니다. 가설 검증보다 발견이 목적입니다.",hardQuestion:false},
+  {id:39,subject:2,subjectName:"데이터 분석 기획",question:"다음 중 '분석 조직의 역할 분리' 관점에서 '데이터 스튜어드(Data Steward)'의 역할로 옳은 것은?",options:["머신러닝 모델 개발","데이터 정의·표준·품질 관리 책임","데이터베이스 서버 하드웨어 관리","예산 수립 및 회계 처리"],answer:1,explanation:"데이터 스튜어드는 데이터 정의, 표준화, 품질 관리, 메타데이터 관리에 대한 책임을 지는 역할입니다.",hardQuestion:true},
+  {id:40,subject:2,subjectName:"데이터 분석 기획",question:"분석 과제 도출의 '상향식(Bottom-up)' 접근법 설명으로 옳은 것은?",options:["경영진이 전략 목표를 먼저 정의한다.","보유한 데이터에서 인사이트를 발굴하여 분석 과제를 도출한다.","벤치마킹 보고서를 참고하여 과제를 선정한다.","외부 컨설턴트가 과제를 제안한다."],answer:1,explanation:"Bottom-up 방식은 현재 보유한 데이터를 먼저 탐색하고, 거기서 발견되는 패턴·인사이트로부터 분석 과제를 역으로 도출합니다.",hardQuestion:false},
+
+  // ═══ 제3과목: 데이터 분석 (25문제) ═══
+  {id:41,subject:3,subjectName:"데이터 분석",question:"R에서 데이터프레임(data.frame)을 생성하는 올바른 코드는?",options:["df <- data.frame(x=1:3, y=c('a','b','c'))","df <- list(x=1:3, y=c('a','b','c'))","df <- matrix(1:6, nrow=2)","df <- c(x=1:3, y=c('a','b','c'))"],answer:0,explanation:"data.frame() 함수로 열을 지정하여 데이터프레임을 생성합니다. list()는 리스트, matrix()는 행렬, c()는 벡터를 생성합니다.",hardQuestion:false},
+  {id:42,subject:3,subjectName:"데이터 분석",question:"정규분포(Normal Distribution)의 특성으로 옳지 않은 것은?",options:["평균, 중앙값, 최빈값이 모두 같다.","좌우 대칭 종 모양(Bell Curve)이다.","왜도(Skewness)가 0이다.","첨도(Kurtosis)가 항상 0이다."],answer:3,explanation:"정규분포의 초과 첨도(Excess Kurtosis)는 0이지만, 첨도(Kurtosis) 자체는 3입니다. 어떤 정의를 쓰느냐에 따라 다르나, '항상 0'이라는 표현은 오해의 소지가 있고 ADSP에서는 초과 첨도=0이 정답입니다. 나머지 ①②③은 모두 정규분포의 올바른 특성입니다.",hardQuestion:true},
+  {id:43,subject:3,subjectName:"데이터 분석",question:"다음 중 제1종 오류(Type I Error)에 대한 설명으로 옳은 것은?",options:["귀무가설이 거짓인데 채택하는 오류","귀무가설이 참인데 기각하는 오류","대립가설이 참인데 기각하는 오류","검정력(Power)이 높아질수록 증가하는 오류"],answer:1,explanation:"제1종 오류(α): 귀무가설(H₀)이 사실임에도 기각하는 오류(False Positive). 제2종 오류(β): H₀이 거짓임에도 채택하는 오류(False Negative).",hardQuestion:true},
+  {id:44,subject:3,subjectName:"데이터 분석",question:"단순선형회귀에서 결정계수(R²)가 0.85라는 의미로 옳은 것은?",options:["예측 정확도가 85%이다.","독립변수가 종속변수 분산의 85%를 설명한다.","회귀계수가 0.85이다.","p-value가 0.85이다."],answer:1,explanation:"R²(결정계수)은 총 변동 중 회귀모형이 설명하는 변동 비율입니다. R²=0.85는 독립변수로 종속변수 변동의 85%를 설명한다는 의미입니다.",hardQuestion:false},
+  {id:45,subject:3,subjectName:"데이터 분석",question:"로지스틱 회귀(Logistic Regression)에서 출력값은 무엇인가?",options:["연속형 수치","이진 분류(0 또는 1)의 확률값(0~1)","군집 번호","주성분 점수"],answer:1,explanation:"로지스틱 회귀는 시그모이드 함수를 사용하여 종속변수가 특정 클래스에 속할 확률(0~1)을 출력합니다.",hardQuestion:false},
+  {id:46,subject:3,subjectName:"데이터 분석",question:"의사결정나무(Decision Tree)에서 분기 기준으로 사용되지 않는 것은?",options:["지니 불순도(Gini Impurity)","엔트로피(Entropy)","정보 이득(Information Gain)","피어슨 상관계수"],answer:3,explanation:"의사결정나무의 분기 기준은 지니 불순도, 엔트로피, 정보이득, 분산 감소(회귀) 등입니다. 피어슨 상관계수는 사용되지 않습니다.",hardQuestion:false},
+  {id:47,subject:3,subjectName:"데이터 분석",question:"다음 중 비지도 학습(Unsupervised Learning)에 해당하는 것은?",options:["로지스틱 회귀","랜덤 포레스트","k-평균 군집화(k-Means Clustering)","서포트 벡터 머신(SVM)"],answer:2,explanation:"k-Means, 계층적 군집, DBSCAN 등은 레이블 없이 데이터 내부 구조를 찾는 비지도 학습입니다. 나머지는 지도 학습입니다.",hardQuestion:false},
+  {id:48,subject:3,subjectName:"데이터 분석",question:"k-평균 군집화(k-Means) 알고리즘의 단계를 순서대로 나열한 것은?",options:["k개 초기 중심 설정 → 각 점을 가장 가까운 중심에 할당 → 중심 재계산 → 수렴 시까지 반복","각 점 할당 → k개 초기 중심 설정 → 중심 재계산 → 수렴 시까지 반복","중심 재계산 → k개 초기 중심 설정 → 각 점 할당 → 수렴 시까지 반복","수렴 시까지 반복 → k개 초기 중심 설정 → 중심 재계산 → 각 점 할당"],answer:0,explanation:"k-Means: ① k개 초기 중심(centroid) 랜덤 선택 → ② 각 점을 가장 가까운 중심에 할당 → ③ 군집 내 평균으로 중심 재계산 → ④ 수렴 시까지 ②③ 반복.",hardQuestion:true},
+  {id:49,subject:3,subjectName:"데이터 분석",question:"교차 검증(Cross-validation) 기법 중 k-겹 교차 검증(k-fold CV)의 설명으로 옳은 것은?",options:["전체 데이터를 k개 동등 분할 후, k번 반복하며 각각 검증셋으로 사용한다.","데이터의 k%만 학습에 사용한다.","k개의 서로 다른 모델을 동시에 학습한다.","k번 무작위로 과반수를 검증셋으로 샘플링한다."],answer:0,explanation:"k-fold CV는 데이터를 k개 균등 분할 후, k번 반복하여 매번 1개 폴드를 검증셋, 나머지 k-1개를 학습셋으로 사용하는 방법입니다.",hardQuestion:false},
+  {id:50,subject:3,subjectName:"데이터 분석",question:"과적합(Overfitting)을 방지하기 위한 방법으로 가장 적절하지 않은 것은?",options:["정규화(Regularization) 적용","학습 데이터 수 증가","모델 복잡도 증가","드롭아웃(Dropout) 적용"],answer:2,explanation:"모델 복잡도 증가(파라미터 수 증가)는 과적합을 심화시킵니다. 과적합 방지법: 정규화(L1/L2), 데이터 증가, Dropout, 조기 종료, 교차 검증 등이 있습니다.",hardQuestion:false},
+  {id:51,subject:3,subjectName:"데이터 분석",question:"혼동 행렬(Confusion Matrix)에서 정밀도(Precision)의 수식으로 옳은 것은?",options:["TP / (TP + FN)","TP / (TP + FP)","TN / (TN + FP)","(TP + TN) / (TP + TN + FP + FN)"],answer:1,explanation:"정밀도(Precision) = TP / (TP + FP): 양성으로 예측한 것 중 실제 양성 비율. 재현율(Recall) = TP / (TP + FN): 실제 양성 중 양성으로 예측한 비율.",hardQuestion:true},
+  {id:52,subject:3,subjectName:"데이터 분석",question:"시계열 분석에서 ARIMA(p,d,q) 모형의 d 파라미터가 의미하는 것은?",options:["자기회귀(AR) 차수","차분(Differencing) 횟수","이동평균(MA) 차수","계절성 주기"],answer:1,explanation:"ARIMA(p,d,q): p=자기회귀(AR) 차수, d=차분 횟수(비정상 시계열을 정상화), q=이동평균(MA) 차수입니다.",hardQuestion:true},
+  {id:53,subject:3,subjectName:"데이터 분석",question:"연관 규칙 분석(Association Rule Mining)에서 '지지도(Support)'의 의미로 옳은 것은?",options:["A와 B를 모두 포함하는 거래의 비율","A를 포함하는 거래 중 B도 포함하는 비율","B를 포함하는 거래 중 A도 포함하는 비율","규칙이 랜덤 대비 얼마나 더 잘 맞는지의 비율"],answer:0,explanation:"지지도(Support) = P(A∩B) = A와 B를 동시에 포함하는 거래 수 / 전체 거래 수. 신뢰도(Confidence) = P(B|A) = P(A∩B)/P(A). 향상도(Lift) = Confidence / P(B).",hardQuestion:true},
+  {id:54,subject:3,subjectName:"데이터 분석",question:"주성분 분석(PCA)의 목적으로 가장 적절한 것은?",options:["분류(Classification) 정확도 최대화","변수 간 상관관계를 유지하며 차원을 축소한다.","이상값(Outlier)을 제거한다.","군집 수를 결정한다."],answer:1,explanation:"PCA는 원래 변수들의 분산을 최대한 보존하는 직교 주성분들로 고차원 데이터를 저차원으로 변환하는 차원 축소 기법입니다.",hardQuestion:false},
+  {id:55,subject:3,subjectName:"데이터 분석",question:"앙상블(Ensemble) 방법 중 '배깅(Bagging)'의 특징으로 옳은 것은?",options:["이전 모델의 오류를 보완하여 순차적으로 학습한다.","부트스트랩 샘플링으로 여러 모델을 병렬 학습 후 집계한다.","여러 종류의 이질적 모델을 결합한다.","하나의 모델을 반복 학습한다."],answer:1,explanation:"배깅(Bootstrap Aggregating): 원본 데이터에서 복원 추출(부트스트랩)로 여러 서브셋을 만들어 병렬 학습 후 다수결/평균으로 결합. Random Forest가 대표적입니다.",hardQuestion:false},
+  {id:56,subject:3,subjectName:"데이터 분석",question:"R에서 결측값(NA)을 처리하는 함수와 그 설명이 올바르게 연결된 것은?",options:["is.na(x): x에서 결측값을 제거한다.","na.omit(x): x에서 NA를 포함한 행을 제거한다.","complete.cases(x): x의 모든 값을 NA로 바꾼다.","na.rm=TRUE: 결측값을 0으로 대체한다."],answer:1,explanation:"na.omit(x)는 결측값이 있는 행을 제거합니다. is.na(x)는 NA 여부를 논리값으로 반환하고, na.rm=TRUE는 집계함수(mean, sum 등)에서 NA를 무시합니다.",hardQuestion:false},
+  {id:57,subject:3,subjectName:"데이터 분석",question:"다음 중 분류 모델의 성능 평가 지표가 아닌 것은?",options:["정확도(Accuracy)","AUC-ROC","F1-Score","RMSE"],answer:3,explanation:"RMSE(Root Mean Squared Error)는 회귀 모델의 예측 오차 평가 지표입니다. 정확도, AUC-ROC, F1-Score는 분류 모델 평가 지표입니다.",hardQuestion:false},
+  {id:58,subject:3,subjectName:"데이터 분석",question:"서포트 벡터 머신(SVM)에서 '커널 트릭(Kernel Trick)'을 사용하는 이유는?",options:["학습 속도를 높이기 위해","선형으로 분리 불가능한 데이터를 고차원에서 분리하기 위해","결측값을 처리하기 위해","과적합을 완전히 방지하기 위해"],answer:1,explanation:"커널 트릭은 원본 공간에서 비선형 경계를 직접 계산하지 않고, 고차원 특성 공간으로 매핑하여 선형 분리를 가능하게 합니다.",hardQuestion:false},
+  {id:59,subject:3,subjectName:"데이터 분석",question:"텍스트 마이닝에서 'TF-IDF'의 의미로 옳은 것은?",options:["문서 내 단어 빈도 × 전체 문서 중 해당 단어 포함 비율","문서 내 단어 빈도 × 전체 문서 중 해당 단어 역문서 빈도","단어의 의미적 유사도를 측정하는 지표","문장의 감성을 양수/음수로 분류하는 점수"],answer:1,explanation:"TF-IDF = TF(해당 문서 내 단어 빈도) × IDF(전체 문서 수 / 해당 단어를 포함한 문서 수의 로그). 자주 등장하지만 여러 문서에 흔한 단어는 낮은 가중치를 갖습니다.",hardQuestion:true},
+  {id:60,subject:3,subjectName:"데이터 분석",question:"정규화(Normalization)와 표준화(Standardization)의 차이로 옳은 것은?",options:["정규화는 데이터를 0~1 범위로 변환하고, 표준화는 평균 0 표준편차 1로 변환한다.","정규화는 평균을 뺀 것이고, 표준화는 최대값으로 나눈 것이다.","두 방법은 완전히 동일하다.","표준화는 이상값 영향을 크게 받는다."],answer:0,explanation:"Min-Max 정규화: (x-min)/(max-min) → [0,1] 범위. Z-Score 표준화: (x-평균)/표준편차 → 평균 0, 표준편차 1. 표준화가 이상값에 더 robust합니다.",hardQuestion:false},
+  {id:61,subject:3,subjectName:"데이터 분석",question:"계층적 군집 분석(Hierarchical Clustering)의 특징으로 옳지 않은 것은?",options:["사전에 군집 수 k를 지정하지 않아도 된다.","덴드로그램(Dendrogram)을 통해 군집 형성 과정을 시각화할 수 있다.","대용량 데이터에 계산 비용이 크다.","중심점(Centroid)을 초기에 랜덤 설정해야 한다."],answer:3,explanation:"중심점 초기 설정은 k-Means의 특징입니다. 계층적 군집 분석은 데이터 포인트 간 거리를 기반으로 계층적으로 병합·분리하며, 사전 k 지정이 불필요합니다.",hardQuestion:true},
+  {id:62,subject:3,subjectName:"데이터 분석",question:"다변량 분석에서 '요인 분석(Factor Analysis)'의 목적으로 옳은 것은?",options:["종속변수를 예측한다.","관측 변수들의 공통 분산을 설명하는 잠재 요인을 추출한다.","군집을 생성한다.","시계열 예측을 수행한다."],answer:1,explanation:"요인 분석은 여러 관측 변수들 사이의 상관관계에서 공통 잠재 요인(Factor)을 추출하여 변수 구조를 설명하는 차원 축소 기법입니다.",hardQuestion:false},
+  {id:63,subject:3,subjectName:"데이터 분석",question:"R에서 선형 회귀 모델을 적합할 때 사용하는 함수는?",options:["glm()","lm()","kmeans()","rpart()"],answer:1,explanation:"lm() (Linear Model): 선형 회귀. glm(): 일반화 선형 모델(로지스틱 회귀 등). kmeans(): k-평균 군집. rpart(): 의사결정나무.",hardQuestion:false},
+  {id:64,subject:3,subjectName:"데이터 분석",question:"시계열 분해(Decomposition)에서 분리하는 4가지 성분이 아닌 것은?",options:["추세(Trend)","계절성(Seasonality)","순환(Cycle)","분산(Variance)"],answer:3,explanation:"시계열 분해의 성분: 추세(Trend), 계절성(Seasonality), 순환(Cycle), 불규칙(Irregular/Residual). 분산은 성분이 아닙니다.",hardQuestion:false},
+  {id:65,subject:3,subjectName:"데이터 분석",question:"부스팅(Boosting) 계열 알고리즘의 특징으로 옳은 것은?",options:["여러 모델을 독립적으로 병렬 학습한다.","이전 모델이 틀린 샘플에 가중치를 높여 순차적으로 학습한다.","단순 다수결로만 최종 예측을 결정한다.","군집 분석에만 사용된다."],answer:1,explanation:"부스팅(AdaBoost, XGBoost 등)은 약한 학습기를 순차적으로 학습하되, 이전 모델이 오분류한 샘플에 높은 가중치를 주어 점진적으로 개선합니다.",hardQuestion:false}
+];
+
+// ─────────────────────────────────────────────
+// STATE
+// ─────────────────────────────────────────────
+let stats = { attempted: 0, correct: 0, wrongIds: [], flaggedIds: [] };
+let darkMode = false;
+let currentPage = 'home';
+let sessionQueue = [];
+let sessionIdx = 0;
+let sessionCorrect = 0;
+let sessionAttempted = 0;
+let answered = false;
+
+function loadStats() {
+  try {
+    const s = localStorage.getItem('adsp_stats');
+    if (s) stats = JSON.parse(s);
+    const d = localStorage.getItem('adsp_dark_mode');
+    if (d !== null) darkMode = JSON.parse(d);
+  } catch(e) {}
+}
+
+function saveStats() {
+  localStorage.setItem('adsp_stats', JSON.stringify(stats));
+  localStorage.setItem('adsp_dark_mode', JSON.stringify(darkMode));
+}
+
+function getHardQuestions() {
+  const flagged = new Set(stats.flaggedIds);
+  return questions.filter(q => q.hardQuestion || flagged.has(q.id));
+}
+
+function getWrongQuestions() {
+  const wrongSet = new Set(stats.wrongIds);
+  return questions.filter(q => wrongSet.has(q.id));
+}
+
+// ─────────────────────────────────────────────
+// NAVIGATION
+// ─────────────────────────────────────────────
+function navigate(page) {
+  currentPage = page;
+  document.querySelectorAll('.nav-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.page === page);
+  });
+  document.getElementById('page-title').textContent = {
+    home: 'ADSP 문제은행', all: '전체 문제 풀기', hard: '자주 틀리는 문제',
+    wrong: '틀린 문제 복습', s1: '제1과목: 데이터 이해',
+    s2: '제2과목: 데이터 분석 기획', s3: '제3과목: 데이터 분석',
+    list: '문제 목록', stats: '학습 통계'
+  }[page] || page;
+  closeSidebar();
+
+  const content = document.getElementById('content');
+  if (page === 'home') renderHome();
+  else if (page === 'stats') renderStats();
+  else if (page === 'list') renderList();
+  else startPractice(page);
+}
+
+// ─────────────────────────────────────────────
+// HOME
+// ─────────────────────────────────────────────
+function renderHome() {
+  const hardCount = getHardQuestions().length;
+  const wrongCount = getWrongQuestions().length;
+  document.getElementById('content').innerHTML = `
+    <div class="page">
+      <div class="home-grid">
+        <div class="mode-card" onclick="navigate('all')">
+          <div class="mc-icon">📝</div>
+          <div class="mc-title">전체 문제 풀기</div>
+          <div class="mc-desc">전 과목 ${questions.length}문제 랜덤</div>
+        </div>
+        <div class="mode-card" onclick="navigate('hard')">
+          <div class="mc-icon">🔥</div>
+          <div class="mc-title">자주 틀리는 문제</div>
+          <div class="mc-desc">난이도 높은 ${hardCount}문제</div>
+        </div>
+        <div class="mode-card" onclick="navigate('wrong')">
+          <div class="mc-icon">❌</div>
+          <div class="mc-title">틀린 문제 복습</div>
+          <div class="mc-desc">${wrongCount}문제 누적 오답</div>
+        </div>
+        <div class="mode-card" onclick="navigate('s1')">
+          <div class="mc-icon">📘</div>
+          <div class="mc-title">제1과목</div>
+          <div class="mc-desc">데이터 이해</div>
+        </div>
+        <div class="mode-card" onclick="navigate('s2')">
+          <div class="mc-icon">📗</div>
+          <div class="mc-title">제2과목</div>
+          <div class="mc-desc">데이터 분석 기획</div>
+        </div>
+        <div class="mode-card" onclick="navigate('s3')">
+          <div class="mc-icon">📙</div>
+          <div class="mc-title">제3과목</div>
+          <div class="mc-desc">데이터 분석</div>
+        </div>
+      </div>
+      <div class="card">
+        <h3 style="margin-bottom:12px;font-size:15px;">📊 과목별 출제 현황</h3>
+        <div class="subject-bar">
+          <div class="sb-header"><span><span class="badge-s1">제1과목</span> 데이터 이해</span><span>${questions.filter(q=>q.subject===1).length}문제</span></div>
+          <div class="sb-bar"><div class="sb-fill" style="width:${questions.filter(q=>q.subject===1).length/questions.length*100}%;background:var(--s1)"></div></div>
+        </div>
+        <div class="subject-bar">
+          <div class="sb-header"><span><span class="badge-s2">제2과목</span> 데이터 분석 기획</span><span>${questions.filter(q=>q.subject===2).length}문제</span></div>
+          <div class="sb-bar"><div class="sb-fill" style="width:${questions.filter(q=>q.subject===2).length/questions.length*100}%;background:var(--s2)"></div></div>
+        </div>
+        <div class="subject-bar">
+          <div class="sb-header"><span><span class="badge-s3">제3과목</span> 데이터 분석</span><span>${questions.filter(q=>q.subject===3).length}문제</span></div>
+          <div class="sb-bar"><div class="sb-fill" style="width:${questions.filter(q=>q.subject===3).length/questions.length*100}%;background:var(--s3)"></div></div>
+        </div>
+      </div>
+    </div>`;
+}
+
+// ─────────────────────────────────────────────
+// PRACTICE
+// ─────────────────────────────────────────────
+function startPractice(page) {
+  let pool;
+  if (page === 'all') pool = [...questions];
+  else if (page === 'hard') pool = getHardQuestions();
+  else if (page === 'wrong') pool = getWrongQuestions();
+  else if (page === 's1') pool = questions.filter(q => q.subject === 1);
+  else if (page === 's2') pool = questions.filter(q => q.subject === 2);
+  else if (page === 's3') pool = questions.filter(q => q.subject === 3);
+
+  if (!pool || pool.length === 0) {
+    document.getElementById('content').innerHTML = `<div class="page"><div class="empty"><div class="e-icon">📭</div><p>문제가 없습니다.<br>다른 모드를 선택하거나 틀린 문제를 쌓아보세요.</p></div></div>`;
+    return;
+  }
+
+  // shuffle
+  sessionQueue = pool.sort(() => Math.random() - 0.5);
+  sessionIdx = 0;
+  sessionCorrect = 0;
+  sessionAttempted = 0;
+  answered = false;
+  renderQuestion();
+}
+
+function renderQuestion() {
+  answered = false;
+  if (sessionIdx >= sessionQueue.length) {
+    renderSessionEnd();
+    return;
+  }
+  const q = sessionQueue[sessionIdx];
+  const flagged = stats.flaggedIds.includes(q.id);
+  const badgeClass = ['','badge-s1','badge-s2','badge-s3'][q.subject];
+  const subjectColors = ['','var(--s1)','var(--s2)','var(--s3)'];
+
+  const pct = sessionAttempted > 0 ? Math.round(sessionCorrect / sessionAttempted * 100) : 0;
+
+  document.getElementById('content').innerHTML = `
+    <div class="page">
+      <div class="session-bar">
+        <span class="s-label">세션</span>
+        <span class="s-val">${sessionIdx + 1} / ${sessionQueue.length}</span>
+        <div class="s-bar"><div class="s-fill" id="s-fill" style="width:${pct}%"></div></div>
+        <span class="s-val" style="color:var(--correct)">${sessionCorrect}</span><span class="s-label">정답</span>
+        <span class="s-val" style="color:var(--wrong)">${sessionAttempted - sessionCorrect}</span><span class="s-label">오답</span>
+        <span class="s-val">${pct}%</span>
+      </div>
+      <div class="card">
+        <div class="q-header">
+          <span class="q-num">Q${sessionIdx + 1}</span>
+          <span class="${badgeClass}">${q.subjectName}</span>
+          ${q.hardQuestion || stats.flaggedIds.includes(q.id) ? '<span class="badge-hard">자주 틀림</span>' : ''}
+        </div>
+        <div class="q-text">${q.question}</div>
+        <div class="options" id="options">
+          ${q.options.map((opt, i) => `
+            <button class="opt-btn" onclick="checkAnswer(${i})" data-idx="${i}">
+              <span class="opt-num">${['①','②','③','④'][i]}</span>
+              <span>${opt}</span>
+            </button>
+          `).join('')}
+        </div>
+        <div id="result-panel"></div>
+        <div class="q-actions" id="q-actions">
+          <button class="btn btn-orange" onclick="toggleFlag(${q.id})" id="flag-btn">${flagged ? '⭐ 오답노트 해제' : '☆ 오답노트 추가'}</button>
+        </div>
+      </div>
+    </div>`;
+}
+
+function checkAnswer(selected) {
+  if (answered) return;
+  answered = true;
+  const q = sessionQueue[sessionIdx];
+  const isCorrect = selected === q.answer;
+
+  sessionAttempted++;
+  if (isCorrect) sessionCorrect++;
+
+  stats.attempted++;
+  if (isCorrect) {
+    stats.correct++;
+    stats.wrongIds = stats.wrongIds.filter(id => id !== q.id);
+  } else {
+    if (!stats.wrongIds.includes(q.id)) stats.wrongIds.push(q.id);
+  }
+  saveStats();
+  updateSidebar();
+
+  // Disable all buttons and mark
+  document.querySelectorAll('.opt-btn').forEach((btn, i) => {
+    btn.disabled = true;
+    if (i === q.answer) btn.classList.add('correct');
+    if (i === selected && !isCorrect) btn.classList.add('wrong');
+  });
+
+  const pct = Math.round(sessionCorrect / sessionAttempted * 100);
+  document.getElementById('s-fill').style.width = pct + '%';
+
+  document.getElementById('result-panel').innerHTML = `
+    <div class="result-panel ${isCorrect ? 'correct' : 'wrong'}">
+      <div class="result-title ${isCorrect ? 'correct' : 'wrong'}">${isCorrect ? '✅ 정답입니다!' : '❌ 오답입니다. 정답: ' + ['①','②','③','④'][q.answer]}</div>
+      <div class="result-exp">${q.explanation}</div>
+    </div>`;
+
+  document.getElementById('q-actions').innerHTML = `
+    <button class="btn btn-primary" onclick="nextQuestion()">다음 문제 →</button>
+    <button class="btn btn-orange" onclick="toggleFlag(${q.id})" id="flag-btn">${stats.flaggedIds.includes(q.id) ? '⭐ 오답노트 해제' : '☆ 오답노트 추가'}</button>
+    <button class="btn btn-outline" onclick="navigate(currentPage)">처음부터</button>`;
+}
+
+function nextQuestion() {
+  sessionIdx++;
+  renderQuestion();
+}
+
+function toggleFlag(qid) {
+  if (stats.flaggedIds.includes(qid)) {
+    stats.flaggedIds = stats.flaggedIds.filter(id => id !== qid);
+  } else {
+    stats.flaggedIds.push(qid);
+  }
+  saveStats();
+  updateSidebar();
+  const btn = document.getElementById('flag-btn');
+  if (btn) btn.textContent = stats.flaggedIds.includes(qid) ? '⭐ 오답노트 해제' : '☆ 오답노트 추가';
+}
+
+function renderSessionEnd() {
+  const pct = sessionAttempted > 0 ? Math.round(sessionCorrect / sessionAttempted * 100) : 0;
+  let grade = pct >= 80 ? '🎉 합격 수준!' : pct >= 60 ? '👍 양호' : '📚 더 학습 필요';
+  document.getElementById('content').innerHTML = `
+    <div class="page">
+      <div class="card" style="text-align:center;padding:40px 24px">
+        <div style="font-size:64px;margin-bottom:16px">${pct >= 80 ? '🏆' : pct >= 60 ? '🥈' : '📖'}</div>
+        <h2 style="font-size:24px;margin-bottom:8px">세션 완료!</h2>
+        <p style="color:var(--text2);margin-bottom:24px">${grade}</p>
+        <div style="font-size:48px;font-weight:800;color:${pct>=60?'var(--correct)':'var(--wrong)'}">${pct}%</div>
+        <p style="color:var(--text2);margin-bottom:24px">${sessionCorrect} / ${sessionAttempted} 정답</p>
+        <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
+          <button class="btn btn-primary" onclick="navigate(currentPage)">다시 풀기</button>
+          <button class="btn btn-outline" onclick="navigate('home')">홈으로</button>
+          <button class="btn btn-outline" onclick="navigate('wrong')">오답 복습</button>
+        </div>
+      </div>
+    </div>`;
+}
+
+// ─────────────────────────────────────────────
+// STATS PAGE
+// ─────────────────────────────────────────────
+function renderStats() {
+  const rate = stats.attempted > 0 ? Math.round(stats.correct / stats.attempted * 100) : 0;
+  const wrongSet = new Set(stats.wrongIds);
+
+  const subjectStats = [1,2,3].map(s => {
+    const sq = questions.filter(q => q.subject === s);
+    // Can't track per-subject correctly without more data; show wrong count
+    const wrongInSubject = sq.filter(q => wrongSet.has(q.id)).length;
+    return { subject: s, total: sq.length, wrong: wrongInSubject };
+  });
+
+  document.getElementById('content').innerHTML = `
+    <div class="page">
+      <div class="stats-grid">
+        <div class="stat-card"><div class="sc-num">${stats.attempted}</div><div class="sc-label">총 풀이 수</div></div>
+        <div class="stat-card"><div class="sc-num" style="color:var(--correct)">${stats.correct}</div><div class="sc-label">정답 수</div></div>
+        <div class="stat-card"><div class="sc-num" style="color:var(--wrong)">${stats.attempted - stats.correct}</div><div class="sc-label">오답 수</div></div>
+        <div class="stat-card"><div class="sc-num">${rate}%</div><div class="sc-label">전체 정답률</div></div>
+        <div class="stat-card"><div class="sc-num" style="color:var(--hard)">${getHardQuestions().length}</div><div class="sc-label">오답노트 문제</div></div>
+        <div class="stat-card"><div class="sc-num">${stats.wrongIds.length}</div><div class="sc-label">틀린 문제 수</div></div>
+      </div>
+      <div class="card">
+        <h3 style="margin-bottom:16px;font-size:15px;">과목별 오답 현황</h3>
+        ${subjectStats.map(s => `
+          <div class="subject-bar">
+            <div class="sb-header">
+              <span><span class="badge-s${s.subject}">제${s.subject}과목</span></span>
+              <span style="color:var(--wrong)">오답 ${s.wrong}문제 / ${s.total}문제</span>
+            </div>
+            <div class="sb-bar"><div class="sb-fill" style="width:${s.total>0?s.wrong/s.total*100:0}%;background:var(--wrong)"></div></div>
+          </div>`).join('')}
+      </div>
+      <div class="card">
+        <div style="font-size:14px;color:var(--text2);margin-bottom:12px;">정답률</div>
+        <div style="height:8px;background:var(--border);border-radius:4px;overflow:hidden;margin-bottom:8px">
+          <div style="height:100%;width:${rate}%;background:linear-gradient(90deg,var(--primary),var(--primary-light));border-radius:4px;transition:width .5s"></div>
+        </div>
+        <div style="text-align:center;font-size:24px;font-weight:800;color:${rate>=60?'var(--correct)':'var(--wrong)'}">${rate}%</div>
+        <p style="text-align:center;font-size:13px;color:var(--text2);margin-top:4px">ADSP 합격선: 과목별 40% 이상, 전체 60% 이상</p>
+      </div>
+    </div>`;
+}
+
+// ─────────────────────────────────────────────
+// QUESTION LIST
+// ─────────────────────────────────────────────
+function renderList() {
+  const wrongSet = new Set(stats.wrongIds);
+  const flaggedSet = new Set(stats.flaggedIds);
+
+  const subjectFilter = document.getElementById('list-filter') ? document.getElementById('list-filter').value : '0';
+
+  let filtered = questions;
+  if (subjectFilter && subjectFilter !== '0') filtered = questions.filter(q => q.subject === parseInt(subjectFilter));
+
+  document.getElementById('content').innerHTML = `
+    <div class="page">
+      <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap">
+        <select id="list-filter" onchange="renderList()" style="padding:8px 12px;border:1px solid var(--border);border-radius:8px;background:var(--surface);color:var(--text);font-size:14px">
+          <option value="0">전체 과목</option>
+          <option value="1">제1과목: 데이터 이해</option>
+          <option value="2">제2과목: 분석 기획</option>
+          <option value="3">제3과목: 데이터 분석</option>
+        </select>
+        <span style="padding:8px 12px;font-size:13px;color:var(--text2);align-self:center">${filtered.length}문제</span>
+      </div>
+      <div class="q-list">
+        ${filtered.map(q => `
+          <div class="q-list-item" onclick="jumpToQuestion(${q.id})">
+            <span class="qi-num">#${q.id}</span>
+            <div class="qi-text">
+              ${q.question.length > 60 ? q.question.substring(0,60) + '…' : q.question}
+              <div class="qi-badges">
+                <span class="badge-s${q.subject}">${q.subjectName}</span>
+                ${q.hardQuestion || flaggedSet.has(q.id) ? '<span class="badge-hard">자주 틀림</span>' : ''}
+                ${wrongSet.has(q.id) ? '<span style="background:#FEE2E2;color:#991B1B;font-size:11px;padding:2px 8px;border-radius:20px;font-weight:600">오답</span>' : ''}
+              </div>
+            </div>
+          </div>`).join('')}
+      </div>
+    </div>`;
+}
+
+function jumpToQuestion(qid) {
+  const q = questions.find(x => x.id === qid);
+  if (!q) return;
+  sessionQueue = [q];
+  sessionIdx = 0;
+  sessionCorrect = 0;
+  sessionAttempted = 0;
+  navigate('list');
+  // override content after navigate
+  setTimeout(() => {
+    currentPage = 'list';
+    sessionQueue = [q];
+    sessionIdx = 0;
+    sessionCorrect = 0;
+    sessionAttempted = 0;
+    answered = false;
+    renderQuestion();
+  }, 10);
+}
+
+// ─────────────────────────────────────────────
+// SIDEBAR / DARK / RESET
+// ─────────────────────────────────────────────
+function updateSidebar() {
+  const rate = stats.attempted > 0 ? Math.round(stats.correct / stats.attempted * 100) : 0;
+  document.getElementById('sb-rate').textContent = rate + '%';
+  document.getElementById('sb-attempted').textContent = stats.attempted;
+  document.getElementById('sb-bar').style.width = rate + '%';
+  document.getElementById('hard-count').textContent = getHardQuestions().length || '';
+  document.getElementById('wrong-count').textContent = stats.wrongIds.length || '';
+}
+
+function toggleDark() {
+  darkMode = !darkMode;
+  document.documentElement.setAttribute('data-dark', darkMode);
+  document.getElementById('dark-btn').textContent = darkMode ? '☀️ 라이트모드' : '🌙 다크모드';
+  saveStats();
+}
+
+function openSidebar() {
+  document.getElementById('sidebar').classList.add('open');
+  document.getElementById('overlay').classList.add('show');
+}
+
+function closeSidebar() {
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('overlay').classList.remove('show');
+}
+
+function showReset() { document.getElementById('reset-modal').classList.add('show'); }
+function hideReset() { document.getElementById('reset-modal').classList.remove('show'); }
+
+function resetAll() {
+  stats = { attempted: 0, correct: 0, wrongIds: [], flaggedIds: [] };
+  saveStats();
+  updateSidebar();
+  hideReset();
+  navigate('home');
+}
+
+// ─────────────────────────────────────────────
+// INIT
+// ─────────────────────────────────────────────
+loadStats();
+if (darkMode) {
+  document.documentElement.setAttribute('data-dark', 'true');
+  document.getElementById('dark-btn').textContent = '☀️ 라이트모드';
+}
+updateSidebar();
+renderHome();
+</script>
+</body>
+</html>
