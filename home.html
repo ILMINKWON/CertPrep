@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CertPrep — 자격증 문제은행</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: #0F172A;
+    color: #F8FAFC;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+  .logo {
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: #6366F1;
+    margin-bottom: 16px;
+  }
+  h1 {
+    font-size: clamp(28px, 5vw, 48px);
+    font-weight: 800;
+    text-align: center;
+    margin-bottom: 12px;
+    background: linear-gradient(135deg, #818CF8, #38BDF8);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .subtitle {
+    font-size: 16px;
+    color: #94A3B8;
+    text-align: center;
+    margin-bottom: 56px;
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+    width: 100%;
+    max-width: 720px;
+  }
+  .card {
+    background: #1E293B;
+    border: 1px solid #334155;
+    border-radius: 16px;
+    padding: 32px;
+    text-decoration: none;
+    color: inherit;
+    transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    border-radius: 16px 16px 0 0;
+  }
+  .card.adsp::before { background: linear-gradient(90deg, #6366F1, #818CF8); }
+  .card.nclex::before { background: linear-gradient(90deg, #0EA5E9, #38BDF8); }
+  .card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 40px rgba(0,0,0,0.3);
+  }
+  .card.adsp:hover { border-color: #6366F1; }
+  .card.nclex:hover { border-color: #0EA5E9; }
+  .badge {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    border-radius: 100px;
+    margin-bottom: 16px;
+  }
+  .adsp .badge { background: #312E81; color: #A5B4FC; }
+  .nclex .badge { background: #0C4A6E; color: #7DD3FC; }
+  .card h2 {
+    font-size: 22px;
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+  .card p {
+    font-size: 14px;
+    color: #94A3B8;
+    line-height: 1.6;
+    margin-bottom: 24px;
+  }
+  .meta {
+    display: flex;
+    gap: 16px;
+  }
+  .meta span {
+    font-size: 13px;
+    color: #64748B;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .arrow {
+    position: absolute;
+    right: 24px;
+    bottom: 28px;
+    font-size: 20px;
+    color: #334155;
+    transition: color 0.2s, transform 0.2s;
+  }
+  .card:hover .arrow {
+    transform: translateX(4px);
+  }
+  .adsp:hover .arrow { color: #6366F1; }
+  .nclex:hover .arrow { color: #0EA5E9; }
+  footer {
+    margin-top: 56px;
+    font-size: 13px;
+    color: #475569;
+    text-align: center;
+  }
+  footer a { color: #6366F1; text-decoration: none; }
+</style>
+</head>
+<body>
+
+<div class="logo">CertPrep</div>
+<h1>자격증 문제은행</h1>
+<p class="subtitle">AI로 만든 실전 대비 문제은행 — 무료, 설치 없음</p>
+
+<div class="grid">
+
+  <a class="card adsp" href="index.html">
+    <div class="badge">Korean</div>
+    <h2>ADSP</h2>
+    <p>데이터분석 준전문가<br>제1~3과목 전체 대비</p>
+    <div class="meta">
+      <span>📝 65문제</span>
+      <span>📚 3과목</span>
+    </div>
+    <span class="arrow">→</span>
+  </a>
+
+  <a class="card nclex" href="nclex.html">
+    <div class="badge">English</div>
+    <h2>NCLEX-RN</h2>
+    <p>Nursing Licensure Exam<br>NGN-style clinical scenarios</p>
+    <div class="meta">
+      <span>📝 60문제</span>
+      <span>📚 4 categories</span>
+    </div>
+    <span class="arrow">→</span>
+  </a>
+
+</div>
+
+<footer>
+  Built with Claude Code · <a href="https://github.com/ILMINKWON/CertPrep" target="_blank">GitHub</a>
+</footer>
+
+</body>
+</html>
