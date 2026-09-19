@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NCLEX 문제은행 - Nursing Licensure Exam</title>
+<style>
+  :root {
+    --primary: #0EA5E9;
+    --primary-light: #38BDF8;
+    --primary-dark: #0369A1;
+    --bg: #F8FAFC;
+    --surface: #FFFFFF;
+    --surface2: #F1F5F9;
+    --border: #E2E8F0;
+    --text: #0F172A;
+    --text2: #475569;
+    --text3: #94A3B8;
+    --correct: #10B981;
+    --wrong: #EF4444;
+    --hard: #F59E0B;
+    --s1: #6366F1;
+    --s2: #10B981;
+    --s3: #F59E0B;
+    --s4: #EF4444;
+    --shadow: 0 1px 3px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.06);
+    --shadow-lg: 0 4px 16px rgba(0,0,0,.10);
+    --radius: 12px;
+  }
+  [data-dark="true"] {
+    --bg: #0F172A;
+    --surface: #1E293B;
+    --surface2: #263045;
+    --border: #334155;
+    --text: #F1F5F9;
+    --text2: #94A3B8;
+    --text3: #475569;
+    --shadow: 0 1px 3px rgba(0,0,0,.3);
+    --shadow-lg: 0 4px 16px rgba(0,0,0,.4);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Apple SD Gothic Neo', 'Noto Sans KR', system-ui, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; transition: background .2s, color .2s; }
+
+  .app { display: grid; grid-template-columns: 270px 1fr; min-height: 100vh; max-width: 1280px; margin: 0 auto; }
+  @media (max-width: 768px) { .app { grid-template-columns: 1fr; } }
+
+  .sidebar { background: var(--surface); border-right: 1px solid var(--border); padding: 20px 0; display: flex; flex-direction: column; position: sticky; top: 0; height: 100vh; overflow-y: auto; transition: background .2s; }
+  @media (max-width: 768px) { .sidebar { position: fixed; top: 0; left: -270px; width: 270px; height: 100vh; z-index: 200; transition: left .25s ease; } .sidebar.open { left: 0; } }
+  .sidebar-logo { padding: 0 20px 20px; border-bottom: 1px solid var(--border); }
+  .sidebar-logo h1 { font-size: 17px; font-weight: 700; color: var(--primary); }
+  .sidebar-logo p { font-size: 11px; color: var(--text2); margin-top: 2px; }
+  .nav-section { padding: 16px 12px 4px; }
+  .nav-label { font-size: 11px; font-weight: 600; color: var(--text3); text-transform: uppercase; letter-spacing: .06em; padding: 0 8px; margin-bottom: 4px; }
+  .nav-btn { display: flex; align-items: center; gap: 10px; width: 100%; padding: 9px 12px; border: none; border-radius: 8px; background: transparent; color: var(--text2); font-size: 13px; cursor: pointer; text-align: left; transition: background .15s, color .15s; }
+  .nav-btn:hover { background: var(--surface2); color: var(--text); }
+  .nav-btn.active { background: #E0F2FE; color: var(--primary); font-weight: 600; }
+  [data-dark="true"] .nav-btn.active { background: #0c2842; color: #7dd3fc; }
+  .nav-btn .icon { font-size: 15px; width: 20px; text-align: center; }
+  .nav-btn .badge { margin-left: auto; background: var(--primary); color: #fff; font-size: 10px; padding: 1px 6px; border-radius: 20px; }
+  .sidebar-stats { margin-top: auto; padding: 16px; border-top: 1px solid var(--border); }
+  .stat-row { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 6px; }
+  .stat-val { font-weight: 700; color: var(--primary); }
+  .progress-bar { height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; margin-top: 8px; }
+  .progress-fill { height: 100%; background: linear-gradient(90deg, var(--primary), var(--primary-light)); border-radius: 3px; transition: width .5s ease; }
+
+  .main { padding: 24px; }
+  @media (max-width: 768px) { .main { padding: 16px; } }
+
+  .topbar { display: flex; align-items: center; gap: 12px; margin-bottom: 24px; }
+  .topbar h2 { font-size: 19px; font-weight: 700; flex: 1; }
+  .menu-btn { display: none; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 8px; cursor: pointer; font-size: 18px; color: var(--text); }
+  @media (max-width: 768px) { .menu-btn { display: block; } }
+  .icon-btn { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 8px 12px; cursor: pointer; font-size: 13px; color: var(--text2); transition: background .15s; white-space: nowrap; }
+  .icon-btn:hover { background: var(--surface2); }
+
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; box-shadow: var(--shadow); margin-bottom: 20px; transition: background .2s; }
+
+  .home-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 16px; margin-bottom: 24px; }
+  .mode-card { background: var(--surface); border: 2px solid var(--border); border-radius: var(--radius); padding: 20px; cursor: pointer; transition: border-color .15s, box-shadow .15s, transform .1s; text-align: center; }
+  .mode-card:hover { border-color: var(--primary); box-shadow: var(--shadow-lg); transform: translateY(-2px); }
+  .mode-card .mc-icon { font-size: 34px; margin-bottom: 10px; }
+  .mode-card .mc-title { font-size: 14px; font-weight: 700; margin-bottom: 4px; }
+  .mode-card .mc-desc { font-size: 11px; color: var(--text2); }
+
+  .badge-s1 { background: #EEF2FF; color: #4338CA; font-size: 11px; padding: 2px 8px; border-radius: 20px; font-weight: 600; }
+  .badge-s2 { background: #D1FAE5; color: #065F46; font-size: 11px; padding: 2px 8px; border-radius: 20px; font-weight: 600; }
+  .badge-s3 { background: #FEF3C7; color: #92400E; font-size: 11px; padding: 2px 8px; border-radius: 20px; font-weight: 600; }
+  .badge-s4 { background: #FEE2E2; color: #991B1B; font-size: 11px; padding: 2px 8px; border-radius: 20px; font-weight: 600; }
+  .badge-hard { background: #FEF3C7; color: #92400E; font-size: 11px; padding: 2px 8px; border-radius: 20px; font-weight: 600; }
+  .badge-sata { background: #E0F2FE; color: #0369A1; font-size: 11px; padding: 2px 8px; border-radius: 20px; font-weight: 600; }
+  [data-dark="true"] .badge-s1 { background: #1e1b4b; color: #a5b4fc; }
+  [data-dark="true"] .badge-s2 { background: #052e16; color: #6ee7b7; }
+  [data-dark="true"] .badge-s3 { background: #3b2002; color: #fcd34d; }
+  [data-dark="true"] .badge-s4 { background: #450a0a; color: #fca5a5; }
+  [data-dark="true"] .badge-hard { background: #3b2002; color: #fcd34d; }
+
+  .q-header { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+  .q-num { font-size: 13px; color: var(--text2); }
+  .q-text { font-size: 15px; font-weight: 500; line-height: 1.75; margin-bottom: 20px; }
+  .sata-note { font-size: 13px; color: var(--primary); font-weight: 600; margin-bottom: 12px; padding: 8px 12px; background: #E0F2FE; border-radius: 8px; }
+  [data-dark="true"] .sata-note { background: #0c2842; }
+  .options { display: flex; flex-direction: column; gap: 10px; }
+  .opt-btn { display: flex; align-items: flex-start; gap: 12px; padding: 14px 16px; border: 2px solid var(--border); border-radius: 10px; background: var(--surface); cursor: pointer; text-align: left; font-size: 14px; color: var(--text); transition: border-color .15s, background .15s; line-height: 1.5; width: 100%; }
+  .opt-btn:hover:not(:disabled) { border-color: var(--primary); background: #F0F9FF; }
+  [data-dark="true"] .opt-btn:hover:not(:disabled) { background: #0c2842; }
+  .opt-btn:disabled { cursor: default; }
+  .opt-btn.correct { border-color: var(--correct); background: #F0FDF4; color: #065F46; }
+  .opt-btn.wrong { border-color: var(--wrong); background: #FEF2F2; color: #991B1B; }
+  .opt-btn.sata-selected { border-color: var(--primary); background: #E0F2FE; }
+  [data-dark="true"] .opt-btn.correct { background: #052e16; color: #6ee7b7; }
+  [data-dark="true"] .opt-btn.wrong { background: #450a0a; color: #fca5a5; }
+  [data-dark="true"] .opt-btn.sata-selected { background: #0c2842; }
+  .opt-num { font-weight: 700; font-size: 15px; min-width: 22px; flex-shrink: 0; }
+  .result-panel { margin-top: 16px; padding: 16px; border-radius: 10px; border-left: 4px solid; }
+  .result-panel.correct { border-color: var(--correct); background: #F0FDF4; }
+  .result-panel.wrong { border-color: var(--wrong); background: #FEF2F2; }
+  [data-dark="true"] .result-panel.correct { background: #052e16; }
+  [data-dark="true"] .result-panel.wrong { background: #450a0a; }
+  .result-title { font-weight: 700; font-size: 15px; margin-bottom: 6px; }
+  .result-title.correct { color: var(--correct); }
+  .result-title.wrong { color: var(--wrong); }
+  .result-exp { font-size: 13px; line-height: 1.75; color: var(--text2); }
+  .q-actions { display: flex; gap: 10px; margin-top: 18px; flex-wrap: wrap; }
+  .btn { padding: 10px 20px; border-radius: 8px; border: none; font-size: 14px; font-weight: 600; cursor: pointer; transition: background .15s, transform .1s; }
+  .btn:active { transform: scale(.97); }
+  .btn-primary { background: var(--primary); color: #fff; }
+  .btn-primary:hover { background: var(--primary-dark); }
+  .btn-outline { background: transparent; color: var(--text2); border: 1.5px solid var(--border); }
+  .btn-outline:hover { background: var(--surface2); }
+  .btn-orange { background: #F59E0B; color: #fff; }
+  .btn-orange:hover { background: #D97706; }
+  .btn-submit { background: #10B981; color: #fff; }
+  .btn-submit:hover { background: #059669; }
+
+  .session-bar { display: flex; align-items: center; gap: 12px; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 12px 16px; margin-bottom: 20px; font-size: 13px; flex-wrap: wrap; }
+  .session-bar .s-label { color: var(--text2); }
+  .session-bar .s-val { font-weight: 700; }
+  .session-bar .s-bar { flex: 1; min-width: 80px; height: 8px; background: var(--border); border-radius: 4px; overflow: hidden; }
+  .session-bar .s-fill { height: 100%; border-radius: 4px; background: linear-gradient(90deg, var(--correct), #34D399); transition: width .4s; }
+
+  .stats-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 16px; margin-bottom: 24px; }
+  .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; text-align: center; }
+  .stat-card .sc-num { font-size: 30px; font-weight: 800; color: var(--primary); }
+  .stat-card .sc-label { font-size: 12px; color: var(--text2); margin-top: 4px; }
+  .subject-bar { margin-bottom: 12px; }
+  .subject-bar .sb-header { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 4px; }
+  .subject-bar .sb-bar { height: 8px; background: var(--border); border-radius: 4px; overflow: hidden; }
+  .subject-bar .sb-fill { height: 100%; border-radius: 4px; }
+
+  .q-list { display: flex; flex-direction: column; gap: 8px; }
+  .q-list-item { display: flex; align-items: flex-start; gap: 12px; padding: 14px 16px; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; cursor: pointer; transition: border-color .15s; }
+  .q-list-item:hover { border-color: var(--primary); }
+  .q-list-item .qi-num { font-size: 13px; color: var(--text3); min-width: 30px; padding-top: 2px; }
+  .q-list-item .qi-text { font-size: 14px; flex: 1; line-height: 1.5; }
+  .q-list-item .qi-badges { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 4px; }
+  .empty { text-align: center; padding: 48px; color: var(--text3); }
+  .empty .e-icon { font-size: 48px; margin-bottom: 12px; }
+
+  .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.4); z-index: 150; }
+  @media (max-width: 768px) { .overlay.show { display: block; } }
+
+  .page { animation: fadeIn .2s ease; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+  .modal { display: none; position: fixed; inset: 0; z-index: 300; align-items: center; justify-content: center; }
+  .modal.show { display: flex; }
+  .modal-bg { position: absolute; inset: 0; background: rgba(0,0,0,.5); }
+  .modal-box { position: relative; background: var(--surface); border-radius: var(--radius); padding: 28px; max-width: 340px; width: 90%; box-shadow: var(--shadow-lg); }
+  .modal-box h3 { margin-bottom: 8px; }
+  .modal-box p { font-size: 14px; color: var(--text2); margin-bottom: 20px; }
+  .modal-actions { display: flex; gap: 10px; justify-content: flex-end; }
+</style>
+</head>
+<body>
+<div class="overlay" id="overlay" onclick="closeSidebar()"></div>
+<div class="app" id="app">
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <h1>🏥 NCLEX 문제은행</h1>
+      <p>Nursing Licensure Exam Prep</p>
+    </div>
+    <div class="nav-section">
+      <div class="nav-label">Practice Mode</div>
+      <button class="nav-btn active" onclick="navigate('home')" data-page="home"><span class="icon">🏠</span> Home</button>
+      <button class="nav-btn" onclick="navigate('all')" data-page="all"><span class="icon">📝</span> All Questions</button>
+      <button class="nav-btn" onclick="navigate('hard')" data-page="hard"><span class="icon">🔥</span> Frequently Missed <span class="badge" id="hard-count"></span></button>
+      <button class="nav-btn" onclick="navigate('wrong')" data-page="wrong"><span class="icon">❌</span> Wrong Answers <span class="badge" id="wrong-count"></span></button>
+    </div>
+    <div class="nav-section">
+      <div class="nav-label">By Category</div>
+      <button class="nav-btn" onclick="navigate('s1')" data-page="s1"><span class="icon">🛡️</span> Safe & Effective Care</button>
+      <button class="nav-btn" onclick="navigate('s2')" data-page="s2"><span class="icon">🌱</span> Health Promotion</button>
+      <button class="nav-btn" onclick="navigate('s3')" data-page="s3"><span class="icon">🧠</span> Psychosocial Integrity</button>
+      <button class="nav-btn" onclick="navigate('s4')" data-page="s4"><span class="icon">💊</span> Physiological Integrity</button>
+    </div>
+    <div class="nav-section">
+      <div class="nav-label">Tools</div>
+      <button class="nav-btn" onclick="navigate('list')" data-page="list"><span class="icon">📋</span> Question List</button>
+      <button class="nav-btn" onclick="navigate('stats')" data-page="stats"><span class="icon">📈</span> Statistics</button>
+    </div>
+    <div class="sidebar-stats">
+      <div class="stat-row"><span>Accuracy</span><span class="stat-val" id="sb-rate">0%</span></div>
+      <div class="stat-row"><span>Attempted</span><span class="stat-val" id="sb-attempted">0</span></div>
+      <div class="progress-bar"><div class="progress-fill" id="sb-bar" style="width:0%"></div></div>
+    </div>
+  </aside>
+
+  <main class="main" id="main">
+    <div class="topbar">
+      <button class="menu-btn" onclick="openSidebar()">☰</button>
+      <h2 id="page-title">NCLEX 문제은행</h2>
+      <button class="icon-btn" onclick="toggleDark()" id="dark-btn">🌙 Dark</button>
+      <button class="icon-btn" onclick="showReset()">🔄 Reset</button>
+    </div>
+    <div id="content"></div>
+  </main>
+</div>
+
+<div class="modal" id="reset-modal">
+  <div class="modal-bg" onclick="hideReset()"></div>
+  <div class="modal-box">
+    <h3>Reset Progress</h3>
+    <p>All study records (score, wrong answers, bookmarks) will be deleted. Continue?</p>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="hideReset()">Cancel</button>
+      <button class="btn btn-primary" onclick="resetAll()" style="background:#EF4444">Reset</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ─────────────────────────────────────────────
+// QUESTION DATA (65 questions)
+// ─────────────────────────────────────────────
+const questions = [
+  // ═══ Safe & Effective Care Environment (15q) ═══
+  {id:1,subject:1,subjectName:"Safe & Effective Care",question:"A nurse is caring for four patients. Which patient should the nurse prioritize first?",options:["A patient with chronic back pain requesting pain medication","A post-op patient whose SpO2 just dropped from 98% to 88%","A patient asking for help ambulating to the bathroom","A patient who wants dietary education before discharge"],answer:1,explanation:"Airway and oxygenation (ABC priority) always come first. SpO2 of 88% indicates hypoxemia, which is life-threatening and requires immediate intervention.",hardQuestion:false,type:"mcq"},
+  {id:2,subject:1,subjectName:"Safe & Effective Care",question:"The nurse is delegating tasks to a UAP (Unlicensed Assistive Personnel). Which task is APPROPRIATE to delegate to the UAP?",options:["Assessing a patient's pain level post-surgery","Teaching a diabetic patient insulin injection technique","Taking vital signs on a stable patient","Changing a wound dressing on a surgical incision"],answer:2,explanation:"UAPs can perform basic, routine tasks such as measuring vital signs on stable patients. Assessment, teaching, and wound care on surgical patients require RN-level judgment and cannot be delegated to UAPs.",hardQuestion:false,type:"mcq"},
+  {id:3,subject:1,subjectName:"Safe & Effective Care",question:"A nurse receives a verbal order from a physician by phone. Which action should the nurse take FIRST?",options:["Implement the order immediately","Read back the order to the physician for verification","Document the order and wait for the physician to sign it","Ask the charge nurse to verify the order"],answer:1,explanation:"The 'read-back' or 'repeat-back' technique is the standard safe practice for verbal/telephone orders. After reading back, the nurse should document the order and note it as a verbal order pending physician signature.",hardQuestion:false,type:"mcq"},
+  {id:4,subject:1,subjectName:"Safe & Effective Care",question:"Which of the following is the CORRECT order of hand hygiene steps when using soap and water?",options:["Wet hands → Apply soap → Lather 5 sec → Rinse → Dry","Wet hands → Apply soap → Lather ≥20 sec → Rinse → Dry with single-use towel","Apply soap → Wet hands → Lather 10 sec → Dry → Rinse","Wet hands → Lather 10 sec → Rinse → Apply soap → Dry"],answer:1,explanation:"CDC hand hygiene guidelines: wet hands with clean water → apply soap → lather and scrub all surfaces for at least 20 seconds → rinse under clean running water → dry with a single-use towel.",hardQuestion:false,type:"mcq"},
+  {id:5,subject:1,subjectName:"Safe & Effective Care",question:"A patient on contact precautions needs wound dressing changed. In what order should the nurse don (put on) PPE?",options:["Gown → Gloves → Mask → Goggles","Mask → Goggles → Gown → Gloves","Gloves → Gown → Mask → Goggles","Gown → Mask → Goggles → Gloves"],answer:1,explanation:"CDC DONNING order: Gown (first, covers largest area) → Mask/Respirator → Goggles/Face Shield → Gloves (last, as final barrier). DOFFING order is reversed: Gloves → Goggles → Gown → Mask.",hardQuestion:true,type:"mcq"},
+  {id:6,subject:1,subjectName:"Safe & Effective Care",question:"The nurse is preparing to administer medications. Which action reflects the correct use of the 'Five Rights'?",options:["Checking medication against the MAR before administration","Asking the patient to state their name and date of birth","Verifying the medication name, dose, route, time, and patient","Both A and C"],answer:3,explanation:"The Five Rights: Right Patient, Right Drug, Right Dose, Right Route, Right Time. This includes checking the MAR, verifying patient identity, and confirming all medication parameters. Both A and C together cover multiple rights.",hardQuestion:false,type:"mcq"},
+  {id:7,subject:1,subjectName:"Safe & Effective Care",question:"A patient is identified as a fall risk. Which interventions should the nurse implement? (Select all that apply)",options:["Place the call light within reach","Keep the bed in the lowest position","Apply soft wrist restraints immediately","Keep non-slip footwear available","Raise all four side rails"],answer:[0,1,3],explanation:"Fall prevention: call light within reach, bed in lowest position, non-slip footwear, hourly rounding, and a clear path. Restraints require a physician order and are a last resort. Raising all 4 side rails is considered a restraint and is not appropriate without an order.",hardQuestion:true,type:"sata"},
+  {id:8,subject:1,subjectName:"Safe & Effective Care",question:"Which task can an RN appropriately delegate to an LPN/LVN?",options:["Initial admission assessment","Developing the nursing care plan","Administering a routine oral medication to a stable patient","Educating the patient about a new diagnosis"],answer:2,explanation:"LPNs/LVNs can administer medications to stable patients and perform basic nursing procedures. Initial assessments, care plan development, and patient teaching about new diagnoses are RN responsibilities requiring higher-level clinical judgment.",hardQuestion:true,type:"mcq"},
+  {id:9,subject:1,subjectName:"Safe & Effective Care",question:"A nurse discovers a medication error. What is the PRIORITY action?",options:["Document the error in the patient's chart first","Assess the patient for adverse effects","Notify the pharmacy","Call the patient's family"],answer:1,explanation:"Patient safety is always the first priority. The nurse must assess the patient for any adverse effects from the medication error. Then notify the physician and complete an incident report.",hardQuestion:false,type:"mcq"},
+  {id:10,subject:1,subjectName:"Safe & Effective Care",question:"When using the SBAR communication tool during a patient handoff, what does 'A' stand for?",options:["Assessment","Administration","Allergy","Activity level"],answer:0,explanation:"SBAR = Situation (what's happening), Background (relevant clinical history), Assessment (what you think the problem is), Recommendation (what you want done). 'A' stands for Assessment.",hardQuestion:false,type:"mcq"},
+  {id:11,subject:1,subjectName:"Safe & Effective Care",question:"A patient in protective (reverse) isolation has a fever of 39.5°C. Which visitor policy should be enforced?",options:["No restrictions on visitors","Visitors must wear masks and gowns","No visitors with signs of infection should be allowed","Only immediate family may visit without any precautions"],answer:2,explanation:"Protective (reverse) isolation is used for immunocompromised patients. The goal is to protect the patient FROM pathogens. Any visitor with signs of infection (cold, cough, rash) should not be permitted to visit.",hardQuestion:false,type:"mcq"},
+  {id:12,subject:1,subjectName:"Safe & Effective Care",question:"The nurse uses the Glasgow Coma Scale (GCS) to assess a patient. Which components are included? (Select all that apply)",options:["Eye opening","Verbal response","Motor response","Pupil reactivity","Blood pressure"],answer:[0,1,2],explanation:"GCS measures three components: Eye Opening (1-4), Verbal Response (1-5), and Motor Response (1-6). Maximum score is 15 (fully alert). Pupil reactivity and BP are not part of GCS.",hardQuestion:false,type:"sata"},
+  {id:13,subject:1,subjectName:"Safe & Effective Care",question:"Which action best demonstrates the nurse's understanding of informed consent?",options:["Having the patient sign the form before the physician explains the procedure","Ensuring the patient can read the consent form in English","Witnessing the patient's signature after the physician has explained the procedure","Obtaining verbal consent instead of written consent for a surgical procedure"],answer:2,explanation:"The nurse's role in informed consent is to witness the patient's signature and ensure it was given voluntarily AFTER the physician has explained the procedure, risks, benefits, and alternatives. Obtaining actual consent is the physician's responsibility.",hardQuestion:true,type:"mcq"},
+  {id:14,subject:1,subjectName:"Safe & Effective Care",question:"A nurse is preparing to insert a urinary catheter. After opening the sterile field, a non-sterile object touches the field. What should the nurse do?",options:["Continue with the procedure if only a corner was contaminated","Discard the entire sterile field and open a new kit","Rearrange sterile items away from the contaminated area","Apply clean gloves and proceed carefully"],answer:1,explanation:"Once any part of a sterile field is contaminated, the entire field is considered contaminated. The nurse must discard it and set up a new sterile field. There are no exceptions to this rule.",hardQuestion:false,type:"mcq"},
+  {id:15,subject:1,subjectName:"Safe & Effective Care",question:"A nurse is using Maslow's hierarchy to prioritize care. A patient reports difficulty breathing, hunger, loneliness, and fear about their diagnosis. Which need should the nurse address FIRST?",options:["Fear about diagnosis (safety need)","Loneliness (love/belonging need)","Hunger (physiological need)","Difficulty breathing (physiological need)"],answer:3,explanation:"Using Maslow's, physiological needs take priority over all others. Among physiological needs, airway/breathing is the most critical. Difficulty breathing is more immediately life-threatening than hunger.",hardQuestion:false,type:"mcq"},
+
+  // ═══ Health Promotion & Maintenance (10q) ═══
+  {id:16,subject:2,subjectName:"Health Promotion",question:"A nurse is teaching a patient about breast self-examination (BSE). When should premenopausal women perform BSE?",options:["On the first day of each month","The day after menstruation ends","During menstruation","Any day they remember"],answer:1,explanation:"Premenopausal women should perform BSE 7-10 days after the start of menstruation (or the day after it ends), when breast tissue is least tender and swollen. Postmenopausal women can choose a consistent day each month.",hardQuestion:false,type:"mcq"},
+  {id:17,subject:2,subjectName:"Health Promotion",question:"A mother asks when her infant should receive the first Hepatitis B vaccine. What is the correct response?",options:["At 2 months of age","At birth","At 6 months of age","At 12 months of age"],answer:1,explanation:"The CDC immunization schedule recommends the first Hepatitis B (HepB) vaccine at birth, ideally within 24 hours of delivery. The series continues at 1-2 months and 6-18 months.",hardQuestion:false,type:"mcq"},
+  {id:18,subject:2,subjectName:"Health Promotion",question:"A nurse is conducting a health screening. Which finding requires IMMEDIATE follow-up?",options:["Blood pressure of 128/82 mmHg in a 50-year-old","Blood glucose of 220 mg/dL in a known diabetic who took insulin this morning","A BMI of 27 in an otherwise healthy adult","Total cholesterol of 195 mg/dL"],answer:1,explanation:"A blood glucose of 220 mg/dL in a diabetic who already took insulin suggests possible hypoglycemia risk or insulin failure and requires immediate assessment. BP of 128/82 is stage 1 hypertension but not immediately emergent. BMI 27 is overweight, and cholesterol 195 is normal.",hardQuestion:true,type:"mcq"},
+  {id:19,subject:2,subjectName:"Health Promotion",question:"Which developmental milestone is expected in a healthy 12-month-old child?",options:["Speaking in 2-3 word phrases","Walking independently or with support","Riding a tricycle","Drawing circles"],answer:1,explanation:"By 12 months, children typically say 1-3 words, use a pincer grasp, and begin walking (with or without support). 2-3 word phrases develop by 24 months; tricycle riding by 3 years; drawing circles by 3 years.",hardQuestion:false,type:"mcq"},
+  {id:20,subject:2,subjectName:"Health Promotion",question:"A nurse is counseling a pregnant woman in her first trimester. Which supplement is MOST important to recommend to prevent neural tube defects?",options:["Iron","Calcium","Folic acid","Vitamin D"],answer:2,explanation:"Folic acid (400-800 mcg/day) is critical in the first trimester (ideally starting before conception) to prevent neural tube defects such as spina bifida and anencephaly. Iron is important for anemia prevention; calcium for bone development.",hardQuestion:false,type:"mcq"},
+  {id:21,subject:2,subjectName:"Health Promotion",question:"Which screening is recommended annually for all adults starting at age 45, according to current guidelines?",options:["Colonoscopy","Colorectal cancer screening","Chest X-ray","Pap smear (cervical cytology)"],answer:1,explanation:"The USPSTF recommends colorectal cancer screening beginning at age 45. This can include annual fecal immunochemical test (FIT), annual high-sensitivity guaiac FOBT, or colonoscopy every 10 years, among other options.",hardQuestion:false,type:"mcq"},
+  {id:22,subject:2,subjectName:"Health Promotion",question:"A nurse teaches a patient about primary prevention. Which action is an example of PRIMARY prevention?",options:["Monthly breast self-examination","Mammogram screening","HPV vaccination for an adolescent","Chemotherapy for breast cancer"],answer:2,explanation:"Primary prevention prevents disease before it occurs (e.g., immunizations, healthy lifestyle education). Secondary prevention detects disease early (mammograms, BSE). Tertiary prevention manages existing disease (chemotherapy).",hardQuestion:false,type:"mcq"},
+  {id:23,subject:2,subjectName:"Health Promotion",question:"A nurse is teaching a new mother about sudden infant death syndrome (SIDS) prevention. Which instruction is MOST important?",options:["Place the infant to sleep on their stomach","Use a soft mattress with bumper pads","Place the infant on their back to sleep in a firm, flat surface","Co-sleep with the infant for easy nighttime feeding"],answer:2,explanation:"The 'Back to Sleep' campaign (now Safe Sleep): infants should always be placed on their back on a firm, flat surface without soft bedding, bumper pads, or pillows. Co-sleeping significantly increases SIDS risk.",hardQuestion:false,type:"mcq"},
+  {id:24,subject:2,subjectName:"Health Promotion",question:"Which patient is at HIGHEST risk for osteoporosis?",options:["A 65-year-old Black male who exercises regularly","A 55-year-old postmenopausal White female who smokes","A 40-year-old Hispanic female with regular menstrual cycles","A 70-year-old Asian male with a calcium-rich diet"],answer:1,explanation:"Osteoporosis risk factors: postmenopausal status (estrogen loss), White/Asian race, female sex, smoking, low BMI, low calcium/vitamin D intake, sedentary lifestyle, and family history. The postmenopausal White female who smokes has multiple risk factors.",hardQuestion:true,type:"mcq"},
+  {id:25,subject:2,subjectName:"Health Promotion",question:"A nurse is teaching a patient with hypertension about the DASH diet. Which foods should be EMPHASIZED? (Select all that apply)",options:["Fruits and vegetables","Low-fat dairy products","High-sodium canned soups","Whole grains","Lean meats and fish"],answer:[0,1,3,4],explanation:"The DASH (Dietary Approaches to Stop Hypertension) diet emphasizes fruits, vegetables, whole grains, low-fat dairy, lean meats, nuts, and seeds. High-sodium foods are to be AVOIDED, as sodium raises blood pressure.",hardQuestion:false,type:"sata"},
+
+  // ═══ Psychosocial Integrity (10q) ═══
+  {id:26,subject:3,subjectName:"Psychosocial Integrity",question:"A patient says, 'I feel like no one cares about me.' Which response demonstrates THERAPEUTIC communication?",options:["'I'm sure your family cares. They look worried.'","'You shouldn't feel that way. You have a lot of support.'","'It sounds like you're feeling lonely. Tell me more about that.'","'Would you like me to call your family in?'"],answer:2,explanation:"Therapeutic communication uses reflection and open-ended encouragement. Acknowledging feelings ('It sounds like you're feeling lonely') and inviting elaboration ('Tell me more') validates the patient's emotion without minimizing or redirecting it.",hardQuestion:false,type:"mcq"},
+  {id:27,subject:3,subjectName:"Psychosocial Integrity",question:"A nurse is caring for a patient who was just told they have terminal cancer. The patient says, 'This can't be right. The test must be wrong.' What stage of grief is this?",options:["Anger","Bargaining","Depression","Denial"],answer:3,explanation:"Kübler-Ross stages of grief: Denial → Anger → Bargaining → Depression → Acceptance. 'This can't be right' reflects DENIAL, the first stage, where the patient refuses to accept the reality of the diagnosis.",hardQuestion:false,type:"mcq"},
+  {id:28,subject:3,subjectName:"Psychosocial Integrity",question:"A patient with schizophrenia says, 'The government is sending radio waves through my fillings to control my thoughts.' How should the nurse respond?",options:["'That's impossible. Government agencies don't do that.'","'I don't hear any radio waves, but I can see you're very frightened.'","'Let me check your dental records to see if you have any fillings.'","'I agree, that sounds very dangerous.'"],answer:1,explanation:"The nurse should not reinforce or argue with delusions. Acknowledging the patient's emotional state ('I can see you're frightened') without agreeing with the delusion is the therapeutic approach.",hardQuestion:true,type:"mcq"},
+  {id:29,subject:3,subjectName:"Psychosocial Integrity",question:"A patient with major depressive disorder (MDD) is prescribed fluoxetine (Prozac). What should the nurse include in patient teaching?",options:["'You will feel better within 24-48 hours.'","'Take the medication only when you feel very depressed.'","'It may take 2-4 weeks before you notice a full therapeutic effect.'","'Avoid all physical activity while on this medication.'"],answer:2,explanation:"SSRIs like fluoxetine typically take 2-4 weeks to reach full therapeutic effect. Patients should be counseled about this delay to prevent premature discontinuation. Stopping SSRIs abruptly can cause discontinuation syndrome.",hardQuestion:false,type:"mcq"},
+  {id:30,subject:3,subjectName:"Psychosocial Integrity",question:"Which communication technique should the nurse AVOID when interacting with a patient?",options:["Using open-ended questions","Restating the patient's words","Giving false reassurance ('Everything will be fine')","Sitting at eye level with the patient"],answer:2,explanation:"False reassurance ('Everything will be fine') is a non-therapeutic communication technique. It blocks further discussion and diminishes the patient's concerns. Open-ended questions, restating, and eye-level positioning are therapeutic.",hardQuestion:false,type:"mcq"},
+  {id:31,subject:3,subjectName:"Psychosocial Integrity",question:"A patient expresses suicidal ideation. What is the nurse's PRIORITY action?",options:["Contact the patient's family immediately","Ensure patient safety and ask directly about a plan","Document the statement and continue with scheduled tasks","Transfer the patient to a different unit"],answer:1,explanation:"When suicidal ideation is expressed, the nurse's PRIORITY is to assess immediate safety. Asking directly about a plan, means, and intent does NOT increase suicide risk — it is the standard of care. Then implement continuous observation and notify the physician.",hardQuestion:false,type:"mcq"},
+  {id:32,subject:3,subjectName:"Psychosocial Integrity",question:"A nurse is working with a patient experiencing anxiety. Which intervention is MOST helpful during an acute anxiety attack?",options:["Leave the patient alone to calm down","Provide detailed explanations about the cause of anxiety","Stay with the patient, speak calmly, and guide slow breathing","Encourage the patient to discuss all their worries in detail"],answer:2,explanation:"During an acute anxiety attack, the nurse should stay with the patient (reduces isolation), use a calm tone (prevents escalation), and guide slow, controlled breathing (activates the parasympathetic system). Detailed discussions are counterproductive during acute anxiety.",hardQuestion:false,type:"mcq"},
+  {id:33,subject:3,subjectName:"Psychosocial Integrity",question:"A patient with bipolar disorder is in a manic phase. Which behaviors are expected? (Select all that apply)",options:["Decreased need for sleep","Grandiosity","Psychomotor retardation","Pressured speech","Excessive spending"],answer:[0,1,3,4],explanation:"Manic phase: decreased need for sleep, grandiosity, racing thoughts, pressured speech, increased activity, and risky behaviors (excessive spending, hypersexuality). Psychomotor RETARDATION is a feature of the depressive phase of bipolar disorder.",hardQuestion:true,type:"sata"},
+  {id:34,subject:3,subjectName:"Psychosocial Integrity",question:"A patient refuses a blood transfusion based on religious beliefs. What should the nurse do?",options:["Administer the transfusion anyway to save the patient's life","Respect the patient's right to refuse and document the refusal","Convince the family to override the patient's decision","Seek a court order to proceed with the transfusion"],answer:1,explanation:"Competent adult patients have the legal and ethical right to refuse treatment, including blood transfusions, for any reason including religious beliefs. The nurse must respect this autonomy, document the refusal, and notify the physician.",hardQuestion:false,type:"mcq"},
+  {id:35,subject:3,subjectName:"Psychosocial Integrity",question:"The nurse is caring for a patient recently diagnosed with HIV. The patient says, 'I can't tell my family. They'll disown me.' What is the BEST response?",options:["'You have to tell them eventually. They deserve to know.'","'You're right, it's better to keep this private for now.'","'It sounds like you're worried about their reaction. What do you think would happen?'","'I'll keep this completely confidential. No one will know.'"],answer:2,explanation:"The nurse should acknowledge the patient's feelings and explore their concerns using open-ended questions. This promotes therapeutic communication and helps the patient process the situation. The nurse should not make promises of absolute confidentiality (mandatory reporting exists) or give advice.",hardQuestion:true,type:"mcq"},
+
+  // ═══ Physiological Integrity (30q) ═══
+  {id:36,subject:4,subjectName:"Physiological Integrity",question:"A patient is prescribed warfarin (Coumadin). Which lab value should the nurse monitor to evaluate therapeutic effectiveness?",options:["aPTT (activated partial thromboplastin time)","PT/INR (prothrombin time/International Normalized Ratio)","Platelet count","Bleeding time"],answer:1,explanation:"Warfarin (a Vitamin K antagonist) is monitored with PT/INR. Therapeutic INR for most indications is 2.0-3.0. aPTT monitors heparin therapy. Platelets monitor thrombocytopenia risk. Bleeding time assesses platelet function.",hardQuestion:false,type:"mcq"},
+  {id:37,subject:4,subjectName:"Physiological Integrity",question:"A patient with digoxin toxicity is most likely to exhibit which signs/symptoms? (Select all that apply)",options:["Bradycardia","Visual disturbances (yellow-green halos)","Hypertension","Nausea and vomiting","Tachycardia"],answer:[0,1,3],explanation:"Digoxin toxicity signs: bradycardia, nausea/vomiting, anorexia, visual disturbances (classic yellow-green halos or blurred vision), and cardiac dysrhythmias. Hypertension and tachycardia are NOT typical of digoxin toxicity.",hardQuestion:true,type:"sata"},
+  {id:38,subject:4,subjectName:"Physiological Integrity",question:"A patient is admitted with diabetic ketoacidosis (DKA). Which finding would the nurse EXPECT?",options:["Blood glucose of 60 mg/dL, pH 7.50","Blood glucose of 450 mg/dL, pH 7.20, fruity breath odor","Blood glucose of 200 mg/dL, pH 7.38, no urine ketones","Blood glucose of 500 mg/dL, pH 7.45, no ketones"],answer:1,explanation:"DKA hallmarks: hyperglycemia (>250 mg/dL), metabolic acidosis (pH <7.35, HCO3 <18 mEq/L), ketosis (ketones in blood/urine), and classic fruity/acetone breath odor due to ketone exhalation.",hardQuestion:false,type:"mcq"},
+  {id:39,subject:4,subjectName:"Physiological Integrity",question:"A nurse assesses a patient with left-sided heart failure. Which finding is MOST expected?",options:["Bilateral dependent pitting edema","Jugular vein distension","Crackles in lung bases bilaterally","Hepatomegaly"],answer:2,explanation:"Left-sided heart failure causes pulmonary congestion (fluid backs up into lungs): crackles (rales), dyspnea, orthopnea, and pink frothy sputum. Right-sided HF causes systemic congestion: peripheral edema, JVD, hepatomegaly, and ascites.",hardQuestion:true,type:"mcq"},
+  {id:40,subject:4,subjectName:"Physiological Integrity",question:"A patient receiving IV heparin develops sudden onset of decreased platelets. The nurse suspects heparin-induced thrombocytopenia (HIT). What is the PRIORITY action?",options:["Reduce the heparin infusion rate by half","Discontinue heparin immediately and notify the physician","Administer protamine sulfate","Add aspirin to the regimen"],answer:1,explanation:"HIT is a life-threatening complication. The priority is to DISCONTINUE all heparin immediately (including flushes and heparin-coated catheters) and notify the physician. An alternative anticoagulant (e.g., argatroban) will be ordered.",hardQuestion:true,type:"mcq"},
+  {id:41,subject:4,subjectName:"Physiological Integrity",question:"A patient's arterial blood gas (ABG) shows: pH 7.28, PaCO2 55 mmHg, HCO3 24 mEq/L. How should the nurse interpret this result?",options:["Metabolic acidosis","Metabolic alkalosis","Respiratory acidosis","Respiratory alkalosis"],answer:2,explanation:"ABG interpretation: pH <7.35 = acidosis. Elevated PaCO2 (>45 mmHg) = respiratory cause. Normal HCO3 = no metabolic compensation yet. Conclusion: Respiratory Acidosis (CO2 retention, e.g., COPD, hypoventilation).",hardQuestion:true,type:"mcq"},
+  {id:42,subject:4,subjectName:"Physiological Integrity",question:"A nurse is preparing to administer a blood transfusion. Which action is MOST important before beginning the infusion?",options:["Warm the blood to room temperature for 30 minutes","Verify the blood product and patient identity with another licensed nurse","Prime the IV tubing with 5% dextrose","Administer diphenhydramine prophylactically to every patient"],answer:1,explanation:"Two licensed nurses must verify the blood product (type, expiration, unit number) against the patient's identification band and blood bank band before transfusion. This is the most critical safety step to prevent transfusion reactions from misidentification.",hardQuestion:false,type:"mcq"},
+  {id:43,subject:4,subjectName:"Physiological Integrity",question:"A patient with a nasogastric (NG) tube has residual of 350 mL at the scheduled tube feeding time. What should the nurse do FIRST?",options:["Discard the residual and proceed with feeding","Hold the feeding, return the residual, and notify the physician","Continue the feeding at a slower rate","Remove the NG tube immediately"],answer:1,explanation:"A residual >200-250 mL (per most protocols) is significant. The nurse should hold the feeding, return the aspirate to prevent electrolyte loss, and notify the physician. This prevents aspiration from gastric distension.",hardQuestion:false,type:"mcq"},
+  {id:44,subject:4,subjectName:"Physiological Integrity",question:"Which sign/symptom indicates a hypertensive crisis requiring IMMEDIATE intervention?",options:["BP of 148/92 mmHg with no symptoms","Severe headache, blurred vision, and BP of 210/130 mmHg","BP of 160/100 mmHg in a patient with chronic hypertension","Mild dizziness with BP of 155/95 mmHg"],answer:1,explanation:"Hypertensive crisis (emergency): BP ≥180/120 mmHg WITH signs of end-organ damage — severe headache, visual changes, chest pain, altered mental status. This requires immediate IV antihypertensive therapy.",hardQuestion:false,type:"mcq"},
+  {id:45,subject:4,subjectName:"Physiological Integrity",question:"A patient is prescribed furosemide (Lasix). Which electrolyte should the nurse monitor most closely?",options:["Sodium","Potassium","Calcium","Phosphorus"],answer:1,explanation:"Furosemide is a loop diuretic that causes potassium wasting (hypokalemia). Hypokalemia can cause dangerous cardiac dysrhythmias, especially in patients on digoxin. The nurse should monitor serum potassium and assess for muscle weakness and ECG changes.",hardQuestion:false,type:"mcq"},
+  {id:46,subject:4,subjectName:"Physiological Integrity",question:"A nurse is caring for a post-op appendectomy patient on day 1. Which assessment finding should be reported to the physician?",options:["Pain level of 4/10 controlled with oral analgesics","Urine output of 35 mL/hour","Temperature of 37.5°C (99.5°F)","Absent bowel sounds in all four quadrants"],answer:1,explanation:"Urine output <0.5 mL/kg/hour (typically <30 mL/hr) indicates possible renal hypoperfusion and must be reported. Absent bowel sounds on post-op day 1 are expected (ileus). Mild fever and mild-moderate pain are normal early post-op findings.",hardQuestion:true,type:"mcq"},
+  {id:47,subject:4,subjectName:"Physiological Integrity",question:"A patient develops chest pain, tachycardia, and hypotension after a central line insertion. The nurse notes absent breath sounds on the right side. What complication should the nurse suspect?",options:["Pulmonary embolism","Pneumothorax","Myocardial infarction","Air embolism"],answer:1,explanation:"Absent breath sounds unilaterally after central line insertion + hypotension + tachycardia = pneumothorax (the needle punctured the pleura). Immediate action: notify physician, prepare for chest tube insertion, give high-flow O2.",hardQuestion:false,type:"mcq"},
+  {id:48,subject:4,subjectName:"Physiological Integrity",question:"The nurse is assessing a patient with a possible stroke. Which tool should be used for initial assessment?",options:["Glasgow Coma Scale","FAST (Face drooping, Arm weakness, Speech difficulty, Time to call 911)","NIH Stroke Scale","Mini-Mental State Examination"],answer:1,explanation:"FAST is the rapid public/nursing screening tool for stroke recognition. The NIH Stroke Scale is a more detailed neurological assessment performed by trained clinicians. Immediate recognition with FAST and notification is the priority to minimize brain damage.",hardQuestion:false,type:"mcq"},
+  {id:49,subject:4,subjectName:"Physiological Integrity",question:"A patient with chronic kidney disease (CKD) should follow which dietary restriction?",options:["High potassium, high phosphorus diet","Low potassium, low phosphorus, low sodium diet","High protein diet to replace losses","Unrestricted fluid intake"],answer:1,explanation:"CKD patients have impaired excretion of potassium, phosphorus, and sodium. Hyperkalemia (cardiac arrhythmias), hyperphosphatemia (bone disease), and fluid retention are major complications. Diet must restrict all three.",hardQuestion:false,type:"mcq"},
+  {id:50,subject:4,subjectName:"Physiological Integrity",question:"A nurse is caring for a patient receiving a blood transfusion. After 15 minutes, the patient develops fever, chills, low back pain, and hematuria. What should the nurse do FIRST?",options:["Slow the transfusion rate and monitor closely","Stop the transfusion immediately","Administer diphenhydramine (Benadryl) and continue","Notify the blood bank after the transfusion is complete"],answer:1,explanation:"These symptoms indicate a hemolytic transfusion reaction (ABO incompatibility) — a medical emergency. STOP the transfusion immediately, keep the IV line open with normal saline, notify the physician and blood bank, send the blood bag and patient blood sample to the lab, and monitor for shock and renal failure.",hardQuestion:false,type:"mcq"},
+  {id:51,subject:4,subjectName:"Physiological Integrity",question:"Which patient is at greatest risk for deep vein thrombosis (DVT)?",options:["A 25-year-old marathon runner with no medical history","A 70-year-old patient on bed rest post-total hip replacement","A 45-year-old who walks 30 minutes daily","A 55-year-old taking an anticoagulant for atrial fibrillation"],answer:1,explanation:"Virchow's triad for DVT: venous stasis, hypercoagulability, endothelial damage. The 70-year-old post-hip-replacement patient on bed rest has all three: immobility (stasis), surgical hypercoagulability, and vessel trauma from surgery.",hardQuestion:false,type:"mcq"},
+  {id:52,subject:4,subjectName:"Physiological Integrity",question:"A patient is prescribed metformin for type 2 diabetes. Which condition is a CONTRAINDICATION for metformin?",options:["Mild obesity","Renal impairment (eGFR <30 mL/min)","Hypertension","Age over 65"],answer:1,explanation:"Metformin is contraindicated in significant renal impairment (eGFR <30 mL/min) because it increases the risk of lactic acidosis, a potentially fatal complication. It should also be held before contrast dye procedures.",hardQuestion:true,type:"mcq"},
+  {id:53,subject:4,subjectName:"Physiological Integrity",question:"A patient with asthma is having an acute attack. What is the FIRST medication the nurse should administer?",options:["Inhaled corticosteroid (budesonide)","Short-acting beta-2 agonist (albuterol)","Leukotriene receptor antagonist (montelukast)","IV aminophylline"],answer:1,explanation:"Short-acting beta-2 agonists (SABAs) like albuterol are the first-line rescue medications for acute asthma attacks due to their rapid bronchodilation. Inhaled corticosteroids are for maintenance, not acute rescue. Montelukast and aminophylline are adjunctive or second-line.",hardQuestion:false,type:"mcq"},
+  {id:54,subject:4,subjectName:"Physiological Integrity",question:"A patient with myocardial infarction (MI) is prescribed morphine. What is the PRIMARY nursing concern when administering morphine to this patient?",options:["Addiction potential","Respiratory depression","Increased heart rate","Hypertension"],answer:1,explanation:"Morphine can cause respiratory depression, which is the most dangerous adverse effect. The nurse must monitor respiratory rate and O2 saturation before and after administration. Morphine also causes vasodilation (reduces preload/afterload), which can be beneficial but may cause hypotension.",hardQuestion:false,type:"mcq"},
+  {id:55,subject:4,subjectName:"Physiological Integrity",question:"A nurse is assessing a patient's wound. Which finding indicates a WOUND INFECTION?",options:["Mild redness around the incision on day 2 post-op","Serosanguineous drainage on day 3","Purulent discharge, warmth, and tenderness on day 5","Slight wound edge approximation on day 7"],answer:2,explanation:"Signs of wound infection: purulent (pus-containing) discharge, increased warmth, tenderness/pain, surrounding redness/edema, fever, and increased WBC. Mild redness on day 2 and serosanguineous drainage on day 3 are normal healing responses.",hardQuestion:false,type:"mcq"},
+  {id:56,subject:4,subjectName:"Physiological Integrity",question:"A nurse is caring for a patient with hyperkalemia. Which cardiac rhythm change should the nurse anticipate on the ECG?",options:["Prolonged PR interval and tall peaked T waves","Shortened QT interval and flat T waves","U waves and ST depression","Widened QRS only in right bundle branch block pattern"],answer:0,explanation:"Hyperkalemia ECG changes: tall peaked (tented) T waves (earliest sign) → widened QRS → prolonged PR interval → flat P waves → sine wave pattern → ventricular fibrillation. Recognition is critical as severe hyperkalemia can cause fatal dysrhythmias.",hardQuestion:true,type:"mcq"},
+  {id:57,subject:4,subjectName:"Physiological Integrity",question:"A patient is in the oliguric phase of acute kidney injury (AKI). Which nursing interventions are appropriate? (Select all that apply)",options:["Restrict fluid intake to replace only insensible losses plus urine output","Monitor daily weights","Encourage a high-protein diet","Monitor electrolytes, especially potassium","Administer nephrotoxic medications as ordered"],answer:[0,1,3],explanation:"In oliguric AKI: restrict fluids (kidneys can't excrete excess), monitor daily weights (fluid status), and closely monitor electrolytes (especially K+, risk of hyperkalemia). High-protein diets increase uremic waste. Nephrotoxic drugs (NSAIDs, aminoglycosides) should be AVOIDED.",hardQuestion:true,type:"sata"},
+  {id:58,subject:4,subjectName:"Physiological Integrity",question:"A patient with COPD is receiving supplemental oxygen. The nurse should titrate oxygen to maintain SpO2 at which level?",options:["98-100%","94-98%","88-92%","Below 85%"],answer:2,explanation:"COPD patients retain CO2 and rely on hypoxic drive to breathe. Maintaining SpO2 at 88-92% provides adequate oxygenation without suppressing the hypoxic respiratory drive. Over-oxygenation (SpO2 >96%) can cause hypercapnia and respiratory depression.",hardQuestion:true,type:"mcq"},
+  {id:59,subject:4,subjectName:"Physiological Integrity",question:"A nurse is caring for a patient 24 hours post-thyroidectomy. Which assessment finding requires IMMEDIATE intervention?",options:["Mild sore throat from intubation","Hoarse voice","Positive Chvostek's sign (facial muscle twitching)","Incision site with minimal serosanguineous drainage"],answer:2,explanation:"Positive Chvostek's sign indicates hypocalcemia, a serious complication of thyroidectomy due to inadvertent removal or damage to the parathyroid glands. Hypocalcemia can cause tetany, laryngospasm, and seizures. Calcium gluconate should be at bedside.",hardQuestion:true,type:"mcq"},
+  {id:60,subject:4,subjectName:"Physiological Integrity",question:"A patient with end-stage liver disease has ascites. Which intervention will the nurse anticipate?",options:["High-sodium diet to restore osmotic balance","Fluid restriction and possible paracentesis","Encourage unlimited protein intake","Administer potassium-sparing diuretics like triamterene only"],answer:1,explanation:"Ascites management: sodium restriction (<2g/day), fluid restriction, diuretics (spironolactone + furosemide), and paracentesis for refractory ascites. Liver failure impairs protein synthesis and ammonia metabolism, so protein intake is carefully balanced — not unrestricted.",hardQuestion:false,type:"mcq"},
+  {id:61,subject:4,subjectName:"Physiological Integrity",question:"A nurse is preparing to administer insulin. Which type of insulin has the LONGEST duration of action?",options:["Regular insulin (Humulin R)","Insulin lispro (Humalog)","NPH insulin (Humulin N)","Insulin glargine (Lantus)"],answer:3,explanation:"Insulin glargine (Lantus) is a long-acting (basal) insulin with duration of ~24 hours and no pronounced peak — provides steady background insulin. NPH is intermediate-acting (12-18 hr). Regular is short-acting (5-8 hr). Lispro is rapid-acting (3-5 hr).",hardQuestion:false,type:"mcq"},
+  {id:62,subject:4,subjectName:"Physiological Integrity",question:"A patient develops a pulmonary embolism (PE). Which interventions should the nurse implement FIRST?",options:["Prepare the patient for a V/Q scan","Administer oxygen and notify the physician","Apply compression stockings","Encourage ambulation to prevent further clots"],answer:1,explanation:"Priority in PE: maintain oxygenation (high-flow O2) and notify the physician for immediate anticoagulation and further workup. PE is life-threatening due to ventilation-perfusion mismatch. Ambulation is contraindicated in acute PE.",hardQuestion:false,type:"mcq"},
+  {id:63,subject:4,subjectName:"Physiological Integrity",question:"A patient is receiving total parenteral nutrition (TPN). Which complication should the nurse assess for regularly?",options:["Hyperglycemia","Hypocalcemia","Metabolic alkalosis","Hypernatremia"],answer:0,explanation:"TPN contains high concentrations of dextrose (glucose). Without adequate insulin (endogenous or added to TPN), hyperglycemia is the most common and anticipated complication. Blood glucose should be monitored every 4-6 hours.",hardQuestion:false,type:"mcq"},
+  {id:64,subject:4,subjectName:"Physiological Integrity",question:"The nurse is teaching a patient about signs of hypoglycemia. Which symptoms should the patient report? (Select all that apply)",options:["Shakiness and tremors","Diaphoresis (excessive sweating)","Polydipsia (excessive thirst)","Confusion and irritability","Pale, cool skin"],answer:[0,1,3,4],explanation:"Hypoglycemia symptoms: shakiness, diaphoresis, confusion/irritability, pale cool skin, headache, palpitations, hunger. These are from sympathetic activation and neurological glucose deprivation. Polydipsia (excessive thirst) is a symptom of HYPERGLYCEMIA (diabetes), not hypoglycemia.",hardQuestion:true,type:"sata"},
+  {id:65,subject:4,subjectName:"Physiological Integrity",question:"A nurse is caring for a patient in sinus bradycardia (HR 38 bpm) who is symptomatic (dizzy, hypotensive). What is the FIRST pharmacological intervention?",options:["Adenosine IV push","Atropine 0.5 mg IV","Amiodarone IV infusion","Metoprolol IV"],answer:1,explanation:"Atropine is the first-line drug for symptomatic bradycardia per ACLS guidelines. It blocks the vagus nerve, increasing heart rate. Adenosine is used for SVT. Amiodarone treats tachyarrhythmias. Metoprolol (beta-blocker) would WORSEN bradycardia.",hardQuestion:false,type:"mcq"}
+];
+
+// ─────────────────────────────────────────────
+// STATE
+// ─────────────────────────────────────────────
+let stats = { attempted: 0, correct: 0, wrongIds: [], flaggedIds: [] };
+let darkMode = false;
+let currentPage = 'home';
+let sessionQueue = [];
+let sessionIdx = 0;
+let sessionCorrect = 0;
+let sessionAttempted = 0;
+let answered = false;
+let sataSelected = new Set();
+
+function loadStats() {
+  try {
+    const s = localStorage.getItem('nclex_stats');
+    if (s) stats = JSON.parse(s);
+    const d = localStorage.getItem('nclex_dark_mode');
+    if (d !== null) darkMode = JSON.parse(d);
+  } catch(e) {}
+}
+
+function saveStats() {
+  localStorage.setItem('nclex_stats', JSON.stringify(stats));
+  localStorage.setItem('nclex_dark_mode', JSON.stringify(darkMode));
+}
+
+function getHardQuestions() {
+  const flagged = new Set(stats.flaggedIds);
+  return questions.filter(q => q.hardQuestion || flagged.has(q.id));
+}
+
+function getWrongQuestions() {
+  const wrongSet = new Set(stats.wrongIds);
+  return questions.filter(q => wrongSet.has(q.id));
+}
+
+// ─────────────────────────────────────────────
+// NAVIGATION
+// ─────────────────────────────────────────────
+function navigate(page) {
+  currentPage = page;
+  document.querySelectorAll('.nav-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.page === page);
+  });
+  document.getElementById('page-title').textContent = {
+    home: 'NCLEX 문제은행', all: 'All Questions', hard: 'Frequently Missed',
+    wrong: 'Wrong Answer Review', s1: 'Safe & Effective Care Environment',
+    s2: 'Health Promotion & Maintenance', s3: 'Psychosocial Integrity',
+    s4: 'Physiological Integrity', list: 'Question List', stats: 'Statistics'
+  }[page] || page;
+  closeSidebar();
+  if (page === 'home') renderHome();
+  else if (page === 'stats') renderStats();
+  else if (page === 'list') renderList();
+  else startPractice(page);
+}
+
+// ─────────────────────────────────────────────
+// HOME
+// ─────────────────────────────────────────────
+function renderHome() {
+  const hardCount = getHardQuestions().length;
+  const wrongCount = getWrongQuestions().length;
+  const subjectCounts = [1,2,3,4].map(s => questions.filter(q=>q.subject===s).length);
+  document.getElementById('content').innerHTML = `
+    <div class="page">
+      <div class="home-grid">
+        <div class="mode-card" onclick="navigate('all')">
+          <div class="mc-icon">📝</div>
+          <div class="mc-title">All Questions</div>
+          <div class="mc-desc">${questions.length} questions (random)</div>
+        </div>
+        <div class="mode-card" onclick="navigate('hard')">
+          <div class="mc-icon">🔥</div>
+          <div class="mc-title">Frequently Missed</div>
+          <div class="mc-desc">${hardCount} high-difficulty questions</div>
+        </div>
+        <div class="mode-card" onclick="navigate('wrong')">
+          <div class="mc-icon">❌</div>
+          <div class="mc-title">Wrong Answer Review</div>
+          <div class="mc-desc">${wrongCount} accumulated wrong answers</div>
+        </div>
+        <div class="mode-card" onclick="navigate('s1')">
+          <div class="mc-icon">🛡️</div>
+          <div class="mc-title">Safe & Effective Care</div>
+          <div class="mc-desc">${subjectCounts[0]} questions</div>
+        </div>
+        <div class="mode-card" onclick="navigate('s2')">
+          <div class="mc-icon">🌱</div>
+          <div class="mc-title">Health Promotion</div>
+          <div class="mc-desc">${subjectCounts[1]} questions</div>
+        </div>
+        <div class="mode-card" onclick="navigate('s3')">
+          <div class="mc-icon">🧠</div>
+          <div class="mc-title">Psychosocial Integrity</div>
+          <div class="mc-desc">${subjectCounts[2]} questions</div>
+        </div>
+        <div class="mode-card" onclick="navigate('s4')">
+          <div class="mc-icon">💊</div>
+          <div class="mc-title">Physiological Integrity</div>
+          <div class="mc-desc">${subjectCounts[3]} questions</div>
+        </div>
+      </div>
+      <div class="card">
+        <h3 style="margin-bottom:12px;font-size:15px;">📊 Category Distribution</h3>
+        ${[
+          {s:1,n:'Safe & Effective Care',cls:'badge-s1',color:'var(--s1)'},
+          {s:2,n:'Health Promotion',cls:'badge-s2',color:'var(--s2)'},
+          {s:3,n:'Psychosocial Integrity',cls:'badge-s3',color:'var(--s3)'},
+          {s:4,n:'Physiological Integrity',cls:'badge-s4',color:'var(--s4)'}
+        ].map(x => {
+          const cnt = questions.filter(q=>q.subject===x.s).length;
+          return `<div class="subject-bar">
+            <div class="sb-header"><span><span class="${x.cls}">${x.n}</span></span><span>${cnt} questions</span></div>
+            <div class="sb-bar"><div class="sb-fill" style="width:${cnt/questions.length*100}%;background:${x.color}"></div></div>
+          </div>`;
+        }).join('')}
+      </div>
+    </div>`;
+}
+
+// ─────────────────────────────────────────────
+// PRACTICE
+// ─────────────────────────────────────────────
+function startPractice(page) {
+  let pool;
+  if (page === 'all') pool = [...questions];
+  else if (page === 'hard') pool = getHardQuestions();
+  else if (page === 'wrong') pool = getWrongQuestions();
+  else if (page === 's1') pool = questions.filter(q => q.subject === 1);
+  else if (page === 's2') pool = questions.filter(q => q.subject === 2);
+  else if (page === 's3') pool = questions.filter(q => q.subject === 3);
+  else if (page === 's4') pool = questions.filter(q => q.subject === 4);
+
+  if (!pool || pool.length === 0) {
+    document.getElementById('content').innerHTML = `<div class="page"><div class="empty"><div class="e-icon">📭</div><p>No questions available.<br>Try a different mode or accumulate some wrong answers.</p></div></div>`;
+    return;
+  }
+  sessionQueue = pool.sort(() => Math.random() - 0.5);
+  sessionIdx = 0; sessionCorrect = 0; sessionAttempted = 0; answered = false; sataSelected = new Set();
+  renderQuestion();
+}
+
+function subjectBadgeClass(subject) {
+  return ['','badge-s1','badge-s2','badge-s3','badge-s4'][subject];
+}
+
+function renderQuestion() {
+  answered = false;
+  sataSelected = new Set();
+  if (sessionIdx >= sessionQueue.length) { renderSessionEnd(); return; }
+  const q = sessionQueue[sessionIdx];
+  const flagged = stats.flaggedIds.includes(q.id);
+  const pct = sessionAttempted > 0 ? Math.round(sessionCorrect / sessionAttempted * 100) : 0;
+  const isSata = q.type === 'sata';
+
+  document.getElementById('content').innerHTML = `
+    <div class="page">
+      <div class="session-bar">
+        <span class="s-label">Progress</span>
+        <span class="s-val">${sessionIdx + 1} / ${sessionQueue.length}</span>
+        <div class="s-bar"><div class="s-fill" id="s-fill" style="width:${pct}%"></div></div>
+        <span class="s-val" style="color:var(--correct)">${sessionCorrect}</span><span class="s-label">correct</span>
+        <span class="s-val" style="color:var(--wrong)">${sessionAttempted - sessionCorrect}</span><span class="s-label">wrong</span>
+        <span class="s-val">${pct}%</span>
+      </div>
+      <div class="card">
+        <div class="q-header">
+          <span class="q-num">Q${sessionIdx + 1}</span>
+          <span class="${subjectBadgeClass(q.subject)}">${q.subjectName}</span>
+          ${q.hardQuestion || stats.flaggedIds.includes(q.id) ? '<span class="badge-hard">🔥 Frequently Missed</span>' : ''}
+          ${isSata ? '<span class="badge-sata">SATA</span>' : ''}
+        </div>
+        <div class="q-text">${q.question}</div>
+        ${isSata ? '<div class="sata-note">✓ Select ALL that apply — click Submit when done</div>' : ''}
+        <div class="options" id="options">
+          ${q.options.map((opt, i) => `
+            <button class="opt-btn" onclick="${isSata ? `toggleSata(${i})` : `checkAnswer(${i})`}" data-idx="${i}" id="opt-${i}">
+              <span class="opt-num">${['A','B','C','D','E'][i]}.</span>
+              <span>${opt}</span>
+            </button>
+          `).join('')}
+        </div>
+        ${isSata ? `<div class="q-actions" id="sata-actions"><button class="btn btn-submit" onclick="checkSata()">Submit Answer</button></div>` : ''}
+        <div id="result-panel"></div>
+        <div class="q-actions" id="q-actions">
+          <button class="btn btn-orange" onclick="toggleFlag(${q.id})" id="flag-btn">${flagged ? '⭐ Remove from Notes' : '☆ Add to Wrong Notes'}</button>
+        </div>
+      </div>
+    </div>`;
+}
+
+function toggleSata(idx) {
+  if (answered) return;
+  const btn = document.getElementById(`opt-${idx}`);
+  if (sataSelected.has(idx)) {
+    sataSelected.delete(idx);
+    btn.classList.remove('sata-selected');
+  } else {
+    sataSelected.add(idx);
+    btn.classList.add('sata-selected');
+  }
+}
+
+function checkSata() {
+  if (answered) return;
+  answered = true;
+  const q = sessionQueue[sessionIdx];
+  const correctSet = new Set(q.answer);
+  const isCorrect = sataSelected.size === correctSet.size && [...sataSelected].every(i => correctSet.has(i));
+  recordAnswer(q, isCorrect);
+
+  document.querySelectorAll('.opt-btn').forEach((btn, i) => {
+    btn.disabled = true;
+    if (correctSet.has(i)) btn.classList.add('correct');
+    if (sataSelected.has(i) && !correctSet.has(i)) btn.classList.add('wrong');
+  });
+  const sataBtns = document.getElementById('sata-actions');
+  if (sataBtns) sataBtns.style.display = 'none';
+  showResultPanel(q, isCorrect);
+}
+
+function checkAnswer(selected) {
+  if (answered) return;
+  answered = true;
+  const q = sessionQueue[sessionIdx];
+  const isCorrect = selected === q.answer;
+  recordAnswer(q, isCorrect);
+
+  document.querySelectorAll('.opt-btn').forEach((btn, i) => {
+    btn.disabled = true;
+    if (i === q.answer) btn.classList.add('correct');
+    if (i === selected && !isCorrect) btn.classList.add('wrong');
+  });
+  showResultPanel(q, isCorrect);
+}
+
+function recordAnswer(q, isCorrect) {
+  sessionAttempted++;
+  if (isCorrect) sessionCorrect++;
+  stats.attempted++;
+  if (isCorrect) {
+    stats.correct++;
+    stats.wrongIds = stats.wrongIds.filter(id => id !== q.id);
+  } else {
+    if (!stats.wrongIds.includes(q.id)) stats.wrongIds.push(q.id);
+  }
+  saveStats();
+  updateSidebar();
+  const pct = Math.round(sessionCorrect / sessionAttempted * 100);
+  const fill = document.getElementById('s-fill');
+  if (fill) fill.style.width = pct + '%';
+}
+
+function showResultPanel(q, isCorrect) {
+  const correctLabel = q.type === 'sata'
+    ? q.answer.map(i => ['A','B','C','D','E'][i]).join(', ')
+    : ['A','B','C','D','E'][q.answer];
+
+  document.getElementById('result-panel').innerHTML = `
+    <div class="result-panel ${isCorrect ? 'correct' : 'wrong'}">
+      <div class="result-title ${isCorrect ? 'correct' : 'wrong'}">${isCorrect ? '✅ Correct!' : `❌ Incorrect. Answer: ${correctLabel}`}</div>
+      <div class="result-exp">${q.explanation}</div>
+    </div>`;
+
+  document.getElementById('q-actions').innerHTML = `
+    <button class="btn btn-primary" onclick="nextQuestion()">Next Question →</button>
+    <button class="btn btn-orange" onclick="toggleFlag(${q.id})" id="flag-btn">${stats.flaggedIds.includes(q.id) ? '⭐ Remove from Notes' : '☆ Add to Wrong Notes'}</button>
+    <button class="btn btn-outline" onclick="navigate(currentPage)">Restart</button>`;
+}
+
+function nextQuestion() { sessionIdx++; renderQuestion(); }
+
+function toggleFlag(qid) {
+  if (stats.flaggedIds.includes(qid)) {
+    stats.flaggedIds = stats.flaggedIds.filter(id => id !== qid);
+  } else {
+    stats.flaggedIds.push(qid);
+  }
+  saveStats(); updateSidebar();
+  const btn = document.getElementById('flag-btn');
+  if (btn) btn.textContent = stats.flaggedIds.includes(qid) ? '⭐ Remove from Notes' : '☆ Add to Wrong Notes';
+}
+
+function renderSessionEnd() {
+  const pct = sessionAttempted > 0 ? Math.round(sessionCorrect / sessionAttempted * 100) : 0;
+  let grade = pct >= 80 ? '🎉 Excellent! NCLEX Ready!' : pct >= 60 ? '👍 Good Progress' : '📚 More Study Needed';
+  document.getElementById('content').innerHTML = `
+    <div class="page">
+      <div class="card" style="text-align:center;padding:40px 24px">
+        <div style="font-size:64px;margin-bottom:16px">${pct >= 80 ? '🏆' : pct >= 60 ? '🥈' : '📖'}</div>
+        <h2 style="font-size:24px;margin-bottom:8px">Session Complete!</h2>
+        <p style="color:var(--text2);margin-bottom:24px">${grade}</p>
+        <div style="font-size:48px;font-weight:800;color:${pct>=60?'var(--correct)':'var(--wrong)'}">${pct}%</div>
+        <p style="color:var(--text2);margin-bottom:24px">${sessionCorrect} / ${sessionAttempted} correct</p>
+        <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
+          <button class="btn btn-primary" onclick="navigate(currentPage)">Retry</button>
+          <button class="btn btn-outline" onclick="navigate('home')">Home</button>
+          <button class="btn btn-outline" onclick="navigate('wrong')">Review Wrong</button>
+        </div>
+      </div>
+    </div>`;
+}
+
+// ─────────────────────────────────────────────
+// STATS PAGE
+// ─────────────────────────────────────────────
+function renderStats() {
+  const rate = stats.attempted > 0 ? Math.round(stats.correct / stats.attempted * 100) : 0;
+  const wrongSet = new Set(stats.wrongIds);
+  const subjectData = [
+    {s:1,n:'Safe & Effective Care',cls:'badge-s1',color:'var(--s1)'},
+    {s:2,n:'Health Promotion',cls:'badge-s2',color:'var(--s2)'},
+    {s:3,n:'Psychosocial Integrity',cls:'badge-s3',color:'var(--s3)'},
+    {s:4,n:'Physiological Integrity',cls:'badge-s4',color:'var(--s4)'}
+  ].map(x => {
+    const sq = questions.filter(q => q.subject === x.s);
+    const wrong = sq.filter(q => wrongSet.has(q.id)).length;
+    return {...x, total: sq.length, wrong};
+  });
+
+  document.getElementById('content').innerHTML = `
+    <div class="page">
+      <div class="stats-grid">
+        <div class="stat-card"><div class="sc-num">${stats.attempted}</div><div class="sc-label">Total Attempts</div></div>
+        <div class="stat-card"><div class="sc-num" style="color:var(--correct)">${stats.correct}</div><div class="sc-label">Correct</div></div>
+        <div class="stat-card"><div class="sc-num" style="color:var(--wrong)">${stats.attempted - stats.correct}</div><div class="sc-label">Wrong</div></div>
+        <div class="stat-card"><div class="sc-num">${rate}%</div><div class="sc-label">Accuracy</div></div>
+        <div class="stat-card"><div class="sc-num" style="color:var(--hard)">${getHardQuestions().length}</div><div class="sc-label">In Wrong Notes</div></div>
+        <div class="stat-card"><div class="sc-num">${stats.wrongIds.length}</div><div class="sc-label">Unique Wrong</div></div>
+      </div>
+      <div class="card">
+        <h3 style="margin-bottom:16px;font-size:15px;">Wrong Answers by Category</h3>
+        ${subjectData.map(x => `
+          <div class="subject-bar">
+            <div class="sb-header"><span><span class="${x.cls}">${x.n}</span></span><span style="color:var(--wrong)">Wrong: ${x.wrong} / ${x.total}</span></div>
+            <div class="sb-bar"><div class="sb-fill" style="width:${x.total>0?x.wrong/x.total*100:0}%;background:${x.color}"></div></div>
+          </div>`).join('')}
+      </div>
+      <div class="card">
+        <div style="font-size:14px;color:var(--text2);margin-bottom:12px;">Overall Accuracy</div>
+        <div style="height:8px;background:var(--border);border-radius:4px;overflow:hidden;margin-bottom:8px">
+          <div style="height:100%;width:${rate}%;background:linear-gradient(90deg,var(--primary),var(--primary-light));border-radius:4px;transition:width .5s"></div>
+        </div>
+        <div style="text-align:center;font-size:24px;font-weight:800;color:${rate>=60?'var(--correct)':'var(--wrong)'}">${rate}%</div>
+        <p style="text-align:center;font-size:13px;color:var(--text2);margin-top:4px">NCLEX uses Next Generation NCLEX (NGN) adaptive scoring</p>
+      </div>
+    </div>`;
+}
+
+// ─────────────────────────────────────────────
+// QUESTION LIST
+// ─────────────────────────────────────────────
+function renderList() {
+  const wrongSet = new Set(stats.wrongIds);
+  const flaggedSet = new Set(stats.flaggedIds);
+
+  const prevFilter = document.getElementById('list-filter');
+  const subjectFilter = prevFilter ? prevFilter.value : '0';
+  let filtered = questions;
+  if (subjectFilter && subjectFilter !== '0') filtered = questions.filter(q => q.subject === parseInt(subjectFilter));
+
+  document.getElementById('content').innerHTML = `
+    <div class="page">
+      <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap">
+        <select id="list-filter" onchange="renderList()" style="padding:8px 12px;border:1px solid var(--border);border-radius:8px;background:var(--surface);color:var(--text);font-size:14px">
+          <option value="0">All Categories</option>
+          <option value="1" ${subjectFilter==='1'?'selected':''}>Safe & Effective Care</option>
+          <option value="2" ${subjectFilter==='2'?'selected':''}>Health Promotion</option>
+          <option value="3" ${subjectFilter==='3'?'selected':''}>Psychosocial Integrity</option>
+          <option value="4" ${subjectFilter==='4'?'selected':''}>Physiological Integrity</option>
+        </select>
+        <span style="padding:8px 12px;font-size:13px;color:var(--text2);align-self:center">${filtered.length} questions</span>
+      </div>
+      <div class="q-list">
+        ${filtered.map(q => `
+          <div class="q-list-item" onclick="jumpToQuestion(${q.id})">
+            <span class="qi-num">#${q.id}</span>
+            <div class="qi-text">
+              ${q.question.length > 70 ? q.question.substring(0,70) + '…' : q.question}
+              <div class="qi-badges">
+                <span class="${subjectBadgeClass(q.subject)}">${q.subjectName}</span>
+                ${q.type==='sata' ? '<span class="badge-sata">SATA</span>' : ''}
+                ${q.hardQuestion || flaggedSet.has(q.id) ? '<span class="badge-hard">자주 틀림</span>' : ''}
+                ${wrongSet.has(q.id) ? '<span style="background:#FEE2E2;color:#991B1B;font-size:11px;padding:2px 8px;border-radius:20px;font-weight:600">오답</span>' : ''}
+              </div>
+            </div>
+          </div>`).join('')}
+      </div>
+    </div>`;
+}
+
+function jumpToQuestion(qid) {
+  const q = questions.find(x => x.id === qid);
+  if (!q) return;
+  sessionQueue = [q];
+  sessionIdx = 0; sessionCorrect = 0; sessionAttempted = 0; answered = false; sataSelected = new Set();
+  navigate('list');
+  setTimeout(() => {
+    currentPage = 'list';
+    sessionQueue = [q];
+    sessionIdx = 0; sessionCorrect = 0; sessionAttempted = 0; answered = false; sataSelected = new Set();
+    renderQuestion();
+  }, 10);
+}
+
+// ─────────────────────────────────────────────
+// SIDEBAR / DARK / RESET
+// ─────────────────────────────────────────────
+function updateSidebar() {
+  const rate = stats.attempted > 0 ? Math.round(stats.correct / stats.attempted * 100) : 0;
+  document.getElementById('sb-rate').textContent = rate + '%';
+  document.getElementById('sb-attempted').textContent = stats.attempted;
+  document.getElementById('sb-bar').style.width = rate + '%';
+  document.getElementById('hard-count').textContent = getHardQuestions().length || '';
+  document.getElementById('wrong-count').textContent = stats.wrongIds.length || '';
+}
+
+function toggleDark() {
+  darkMode = !darkMode;
+  document.documentElement.setAttribute('data-dark', darkMode);
+  document.getElementById('dark-btn').textContent = darkMode ? '☀️ Light' : '🌙 Dark';
+  saveStats();
+}
+
+function openSidebar() {
+  document.getElementById('sidebar').classList.add('open');
+  document.getElementById('overlay').classList.add('show');
+}
+
+function closeSidebar() {
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('overlay').classList.remove('show');
+}
+
+function showReset() { document.getElementById('reset-modal').classList.add('show'); }
+function hideReset() { document.getElementById('reset-modal').classList.remove('show'); }
+
+function resetAll() {
+  stats = { attempted: 0, correct: 0, wrongIds: [], flaggedIds: [] };
+  saveStats(); updateSidebar(); hideReset(); navigate('home');
+}
+
+// ─────────────────────────────────────────────
+// INIT
+// ─────────────────────────────────────────────
+loadStats();
+if (darkMode) {
+  document.documentElement.setAttribute('data-dark', 'true');
+  document.getElementById('dark-btn').textContent = '☀️ Light';
+}
+updateSidebar();
+renderHome();
+</script>
+</body>
+</html>
